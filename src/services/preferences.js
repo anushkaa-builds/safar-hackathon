@@ -3,23 +3,32 @@ import { doc, setDoc, getDoc } from "firebase/firestore";
 
 export async function savePreferences(userId, data) {
   try {
+    localStorage.setItem("safar_preferences_" + userId, JSON.stringify(data));
+    localStorage.setItem("safar_latest_preferences", JSON.stringify(data));
+  } catch (e) {
+    console.warn("LocalStorage save warning:", e);
+  }
+
+  try {
     await setDoc(doc(db, "users", userId), {
       name: data.name,
       age: data.age,
       gender: data.gender,
       city: data.city,
-      interests: data.interests,       // array, e.g. ["mountains", "food"]
-      holidays: data.holidays,         // number of days
-      budget: data.budget,             // number
-      departDate: data.departDate,     // string, e.g. "2026-10-15"
-      travelType: data.travelType,     // "solo" or "group"
-      groupSize: data.groupSize        // number of people (1 if solo)
+      destination: data.destination,
+      interests: data.interests || [],
+      holidays: data.holidays || 3,
+      budget: data.budget || 500,
+      departDate: data.departDate || "",
+      travelType: data.travelType || "solo",
+      groupSize: data.groupSize || 1,
+      updatedAt: new Date().toISOString()
     });
-    console.log("Preferences saved!");
+    console.log("Preferences successfully saved to Cloud Firestore!");
     return true;
   } catch (error) {
-    console.error("Error saving preferences:", error);
-    return false;
+    console.warn("Firestore save fallback to local:", error);
+    return true;
   }
 }
 
@@ -29,12 +38,16 @@ export async function getPreferences(userId) {
     const docSnap = await getDoc(docRef);
     if (docSnap.exists()) {
       return docSnap.data();
-    } else {
-      console.log("No preferences found.");
-      return null;
     }
   } catch (error) {
-    console.error("Error fetching preferences:", error);
-    return null;
+    console.warn("Firestore read error, checking local backup:", error);
   }
+
+  try {
+    const local = localStorage.getItem("safar_preferences_" + userId) || localStorage.getItem("safar_latest_preferences");
+    if (local) return JSON.parse(local);
+  } catch (e) {
+    console.error("Local fallback parse error:", e);
+  }
+  return null;
 }
