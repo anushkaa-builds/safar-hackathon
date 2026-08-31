@@ -20,6 +20,9 @@ export async function savePreferences(userId, data) {
       holidays: data.holidays || 3,
       budget: data.budget || 500,
       departDate: data.departDate || "",
+      departTime: data.departTime || "08:00 AM",
+      medicalIssues: data.medicalIssues || [],
+      customMedicalInfo: data.customMedicalInfo || "",
       travelType: data.travelType || "solo",
       groupSize: data.groupSize || 1,
       updatedAt: new Date().toISOString()

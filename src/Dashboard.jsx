@@ -8,7 +8,7 @@ import EmergencyModal from "./components/EmergencyModal";
 import monitorService from "./services/monitoringService";
 import { generateSmartItinerary } from "./services/itineraryGenerator";
 import { getPreferences } from "./services/preferences";
-import { ShieldAlert, Compass, Calendar, Bot, Star, Bell } from "lucide-react";
+import { ShieldAlert, Compass, Calendar, Bot, Star } from "lucide-react";
 
 const tabs = [
   { id: "planner", label: "🎯 Plan Yatra", icon: Compass },
@@ -74,25 +74,36 @@ export default function Dashboard() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-amber-50/30">
-      {/* Top Navbar */}
+      {/* Top Navbar: Centered Heading with Tabs located right below */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
-        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-3 flex items-center justify-between gap-3">
-          {/* Brand Logo */}
+        <div className="max-w-6xl mx-auto px-4 sm:px-8 py-3 flex flex-col items-center justify-center relative">
+          {/* Top SOS button in absolute top-right position */}
+          <div className="absolute right-4 sm:right-8 top-3">
+            <button
+              onClick={() => setSosOpen(true)}
+              className="px-3.5 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 transition shrink-0"
+            >
+              <ShieldAlert className="w-4 h-4" />
+              <span className="hidden sm:inline">SOS Safety</span>
+            </button>
+          </div>
+
+          {/* 1. Main Heading in the Topmost Center */}
           <div 
             onClick={() => setActiveTab("planner")}
-            className="flex items-center gap-2 cursor-pointer shrink-0"
+            className="flex items-center gap-2 cursor-pointer mb-2.5"
           >
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-teal-500 text-white flex items-center justify-center font-black shadow-md">
+            <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-teal-500 text-white flex items-center justify-center font-black shadow-md text-lg">
               🧭
             </div>
-            <div>
-              <span className="font-black text-lg text-slate-900 block leading-tight">YatriSathi</span>
-              <span className="text-[10px] font-black text-emerald-600 uppercase tracking-widest block">Safar • SIH 2026</span>
+            <div className="text-center">
+              <span className="font-black text-2xl text-slate-900 tracking-tight block leading-none">YatriSathi</span>
+              <span className="text-[10px] font-bold text-emerald-700 tracking-wide block mt-0.5">AI-Powered Tourism Optimization Platform</span>
             </div>
           </div>
 
-          {/* Navigation Tabs */}
-          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1">
+          {/* 2. The 4 Tabs located RIGHT BELOW the Main Heading */}
+          <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 max-w-full">
             {tabs.map((tab) => {
               const IconComp = tab.icon;
               const hasAlerts = tab.id === "assistant" && activeAlerts.length > 0;
@@ -100,9 +111,9 @@ export default function Dashboard() {
                 <button
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
-                  className={`relative px-4 py-2.5 rounded-2xl font-black text-xs sm:text-sm shrink-0 flex items-center gap-2 transition ${
+                  className={`relative px-4 py-2 rounded-2xl font-black text-xs sm:text-sm shrink-0 flex items-center gap-2 transition ${
                     activeTab === tab.id
-                      ? "bg-slate-900 text-white shadow-md shadow-slate-900/20"
+                      ? "bg-slate-900 text-white shadow-md shadow-slate-900/20 scale-105"
                       : "bg-slate-100 text-slate-700 hover:bg-slate-200"
                   }`}
                 >
@@ -115,15 +126,6 @@ export default function Dashboard() {
               );
             })}
           </div>
-
-          {/* Emergency SOS Button */}
-          <button
-            onClick={() => setSosOpen(true)}
-            className="px-3.5 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 transition shrink-0"
-          >
-            <ShieldAlert className="w-4 h-4" />
-            <span className="hidden sm:inline">SOS Safety</span>
-          </button>
         </div>
       </header>
 
@@ -151,7 +153,7 @@ export default function Dashboard() {
         )}
       </main>
 
-      {/* Proactive Alert Floating Toast ("Tells user before asking") */}
+      {/* Proactive Alert Floating Toast */}
       {toastAlert && (
         <AlertToast
           alert={toastAlert}

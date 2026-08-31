@@ -107,12 +107,12 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
               <span className="font-black text-base text-emerald-300">₹{activePlan.budgetPerPerson.toLocaleString()}</span>
             </div>
             <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
-              <span className="text-white/70 block">Travel Party</span>
-              <span className="font-black text-base text-white capitalize">{activePlan.travelType} ({activePlan.groupSize} {activePlan.groupSize === 1 ? "Person" : "People"})</span>
+              <span className="text-white/70 block">Departure Timing</span>
+              <span className="font-black text-base text-white">{activePlan.departTime || "08:00 AM"}</span>
             </div>
             <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
-              <span className="text-white/70 block">Altitude & GIS Risk</span>
-              <span className="font-black text-base text-amber-300">{dest.altitudeUnit}</span>
+              <span className="text-white/70 block">Travel Party</span>
+              <span className="font-black text-base text-amber-300 capitalize">{activePlan.travelType} ({activePlan.groupSize} {activePlan.groupSize === 1 ? "Person" : "People"})</span>
             </div>
           </div>
         </div>
@@ -123,6 +123,25 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
         <div className="p-4 rounded-2xl bg-emerald-100 border-2 border-emerald-400 text-emerald-950 font-black text-sm flex items-center justify-between shadow-lg animate-fade-in">
           <span>{swapToast}</span>
           <button onClick={() => setSwapToast("")} className="text-emerald-800 font-bold px-2">✕</button>
+        </div>
+      )}
+
+      {/* Health & Medical Advisory Notice (if user entered any) */}
+      {activePlan.medicalIssues && activePlan.medicalIssues.length > 0 && !activePlan.medicalIssues.includes("None (Fit to travel)") && (
+        <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-sm flex items-start gap-3.5">
+          <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-black shrink-0">
+            ❤️
+          </div>
+          <div>
+            <h4 className="font-black text-slate-900 text-sm">Medical Safety Profile Active</h4>
+            <p className="text-xs text-slate-700 font-medium mt-0.5">
+              Noted Conditions: <span className="font-bold text-rose-800">{activePlan.medicalIssues.join(", ")}</span>. 
+              {activePlan.customMedicalInfo ? ` "${activePlan.customMedicalInfo}"` : ""}
+            </p>
+            <p className="text-[11px] text-slate-600 font-semibold mt-1">
+              💡 Itinerary pace and altitude checkpoints have been calibrated for your safety. Stay well-hydrated and carry essential prescriptions.
+            </p>
+          </div>
         </div>
       )}
 

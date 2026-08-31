@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import destinationsData from "./data/destinationsData";
-import { Search, MapPin, Mountain, Waves, Landmark } from "lucide-react";
+import { Search, MapPin, Check } from "lucide-react";
 
 export default function DestinationPicker({ isOpen, onClose, onSelect }) {
   const [search, setSearch] = useState("");
@@ -28,22 +28,36 @@ export default function DestinationPicker({ isOpen, onClose, onSelect }) {
         {/* Modal Header */}
         <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50 flex items-center justify-between">
           <div>
-            <h3 className="font-black text-xl text-slate-900">Choose Your Destination Circuit</h3>
-            <p className="text-xs text-slate-500 font-semibold">Select a curated circuit with live crowd & GIS risk monitoring</p>
+            <h3 className="font-black text-xl text-slate-900">Choose Destination</h3>
+            <p className="text-xs text-slate-500 font-semibold">Select from popular circuits or type any destination in India</p>
           </div>
           <button onClick={onClose} className="text-slate-500 hover:text-slate-900 font-black text-xl px-2">✕</button>
         </div>
 
-        {/* Search & Category Filter */}
+        {/* Search & Custom Place Field */}
         <div className="p-4 bg-slate-50 border-b border-slate-200 space-y-3">
-          <div className="relative">
-            <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
-            <input
-              value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by circuit name or state (e.g. Kashmir, Goa, Manali...)"
-              className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-300 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
-            />
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search or type any place (e.g. Manali, Ooty, Kashmir, Jaipur, Darjeeling...)"
+                className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-300 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              />
+            </div>
+            {search.trim() && (
+              <button
+                type="button"
+                onClick={() => {
+                  onSelect(search.trim());
+                  onClose();
+                }}
+                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-md transition shrink-0"
+              >
+                Use "{search.trim()}"
+              </button>
+            )}
           </div>
 
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
@@ -57,7 +71,7 @@ export default function DestinationPicker({ isOpen, onClose, onSelect }) {
                     : "bg-white text-slate-700 border border-slate-200 hover:border-slate-300"
                 }`}
               >
-                {c === "all" ? "✨ All Circuits" : c}
+                {c === "all" ? "✨ All Places" : c}
               </button>
             ))}
           </div>
