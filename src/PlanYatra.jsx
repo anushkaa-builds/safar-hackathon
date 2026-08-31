@@ -34,21 +34,21 @@ function getOrCreateUserId() {
 }
 
 export default function PlanYatra({ onItineraryGenerated }) {
-  const [name, setName] = useState("Atharva");
-  const [age, setAge] = useState("21");
+  const [name, setName] = useState("");
+  const [age, setAge] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [gender, setGender] = useState("Male");
-  const [currentCity, setCurrentCity] = useState("Delhi");
-  const [destination, setDestination] = useState("Kashmir");
+  const [gender, setGender] = useState("");
+  const [currentCity, setCurrentCity] = useState("");
+  const [destination, setDestination] = useState("");
 
-  const [durationPreset, setDurationPreset] = useState(5);
-  const [customDays, setCustomDays] = useState("5");
-  const [budget, setBudget] = useState(450); // USD equivalent (~37,350 INR)
+  const [durationPreset, setDurationPreset] = useState(null);
+  const [customDays, setCustomDays] = useState("");
+  const [budget, setBudget] = useState(0); // USD equivalent (~37,350 INR)
 
-  const [selectedInterests, setSelectedInterests] = useState(["🌸 Lakes & Valleys", "🏔️ Mountain Snow"]);
+  const [selectedInterests, setSelectedInterests] = useState([""]);
   const [customInterest, setCustomInterest] = useState("");
 
-  const [departDate, setDepartDate] = useState("2026-10-15");
+  const [departDate, setDepartDate] = useState("0000-00-00");
   const [departTime, setDepartTime] = useState("08:00");
 
   const [selectedMedicalIssues, setSelectedMedicalIssues] = useState(["None (Fit to travel)"]);
@@ -377,22 +377,23 @@ export default function PlanYatra({ onItineraryGenerated }) {
               <span className="font-black text-emerald-800 text-sm">₹</span>
               <input
                 type="number"
-                min="5000"
+                min="0"
                 max="500000"
-                step="500"
-                value={budgetInr}
-                onChange={(e) => handleBudgetChange(e.target.value)}
+                step="any"
+                value={budget === 0 ? "" : budget}
+                placeholder="Enter Budget in INR"
+                onChange={(e) => { const value = e.target.value; setBudget(value === "" ? 0 : Number(value));}}
                 className="w-28 text-slate-900 font-black text-sm sm:text-base focus:outline-none"
               />
-              <span className="text-xs font-bold text-slate-500">(${budget})</span>
+              <span className="text-xs font-bold text-slate-500">({budget})</span>
             </div>
           </div>
 
           <input
             type="range"
-            min="100"
-            max="1500"
-            step="25"
+            min="0"
+            max="500000"
+            step="500"
             value={budget}
             onChange={(e) => setBudget(Number(e.target.value))}
             className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
