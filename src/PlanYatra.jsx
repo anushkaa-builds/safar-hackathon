@@ -43,7 +43,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
 
   const [durationPreset, setDurationPreset] = useState(null);
   const [customDays, setCustomDays] = useState("");
-  const [budget, setBudget] = useState(0); // USD equivalent (~37,350 INR)
+  const [budget, setBudget] = useState(0);  
 
   const [selectedInterests, setSelectedInterests] = useState([""]);
   const [customInterest, setCustomInterest] = useState("");
@@ -93,8 +93,8 @@ export default function PlanYatra({ onItineraryGenerated }) {
   }
 
   function handleBudgetChange(inrValue) {
-    const usd = Math.round(Number(inrValue) / 83);
-    setBudget(usd > 0 ? usd : 100);
+    setBudget(value === "" ? 0 :
+  Number(Value));
   }
 
   function handlePreFill(presetName) {
@@ -177,7 +177,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
     }
   }
 
-  const budgetInr = Math.round(budget * 83);
+  const budgetInr = budget;
   const mapsEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(destination || "India")}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
   const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination || "India")}`;
 
