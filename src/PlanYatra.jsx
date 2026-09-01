@@ -99,29 +99,32 @@ export default function PlanYatra({ onItineraryGenerated }) {
 
   function handlePreFill(presetName) {
     if (presetName === "kashmir") {
-      setName("Atharva");
+      setName("Anushka Yadav");
+      setAge(20);
+      setGender("Female");
+      setCurrentCity("Delhi");
       setDestination("Kashmir");
       handleDurationPreset(5);
-      setBudget(450);
+      setBudget(5000);
       setSelectedInterests(["🌸 Lakes & Valleys", "🏔️ Mountain Snow"]);
       setTravelType("solo");
       setDepartTime("07:30");
       setSelectedMedicalIssues(["None (Fit to travel)"]);
     } else if (presetName === "manali") {
-      setName("Priya & Friends");
+      setName("Nehal & Friends");
       setDestination("Manali");
       handleDurationPreset(4);
-      setBudget(350);
+      setBudget(15000);
       setSelectedInterests(["🏔️ Mountain Snow", "🥾 Nature Trekking"]);
       setTravelType("group");
       setGroupSize(3);
       setDepartTime("06:00");
       setSelectedMedicalIssues(["🤢 Motion / Mountain sickness (AMS)"]);
     } else if (presetName === "goa") {
-      setName("Rahul");
+      setName("Vaibhavi");
       setDestination("Goa");
       handleDurationPreset(3);
-      setBudget(300);
+      setBudget(3000);
       setSelectedInterests(["🌊 Coastal Beaches", "🍛 Authentic Cuisine"]);
       setTravelType("solo");
       setDepartTime("09:00");
@@ -158,7 +161,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
       medicalIssues: selectedMedicalIssues,
       customMedicalInfo,
       travelType,
-      groupSize: travelType === "group" ? Number(groupSize) : 1,
+      groupSize: travelType === "group" ? Number(groupSize) : 3,
     };
 
     await savePreferences(userId, data);
