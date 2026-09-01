@@ -1,3 +1,5 @@
+import destinationsData from "../data/destinationsData";
+
 export function getTravelAndStayOptions(destInput, originCity = "Delhi") {
   let matchedDest = null;
   if (typeof destInput === "string") {
