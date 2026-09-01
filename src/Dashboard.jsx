@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [activeTab, setActiveTab] = useState("planner");
   const [currentItinerary, setCurrentItinerary] = useState(null);
   const [activeAlerts, setActiveAlerts] = useState([]);
+  const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
   const [sosOpen, setSosOpen] = useState(false);
   const [toastAlert, setToastAlert] = useState(null);
 
@@ -42,12 +43,28 @@ export default function Dashboard() {
       if (newSevere) {
         setToastAlert(newSevere);
       }
+      // Show number of active/new alert messages
+      const count = alerts.filter(a => a.isNew).length || (alerts.length > 0 ? 1 : 0);
+      setUnreadAlertsCount(prev => (prev === 0 ? count : prev));
     });
 
     return () => {
       unsubscribe();
     };
   }, []);
+
+  function handleTabChange(tabId) {
+    setActiveTab(tabId);
+    if (tabId === "assistant") {
+      setUnreadAlertsCount(0);
+      setToastAlert(null);
+    }
+  }
+
+  function handleDismissToast() {
+    setToastAlert(null);
+    setUnreadAlertsCount(0);
+  }
 
   function handleItineraryReady(newPlan) {
     setCurrentItinerary(newPlan);
@@ -70,6 +87,8 @@ export default function Dashboard() {
         setActiveTab("itinerary");
       }
     }
+    setToastAlert(null);
+    setUnreadAlertsCount(0);
   }
 
   return (
@@ -90,7 +109,7 @@ export default function Dashboard() {
 
           {/* 1. Main Heading in the Topmost Center */}
           <div 
-            onClick={() => setActiveTab("planner")}
+            onClick={() => handleTabChange("planner")}
             className="flex items-center gap-2 cursor-pointer mb-2.5"
           >
             <div className="w-9 h-9 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-teal-500 text-white flex items-center justify-center font-black shadow-md text-lg">
@@ -106,11 +125,11 @@ export default function Dashboard() {
           <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-1 max-w-full">
             {tabs.map((tab) => {
               const IconComp = tab.icon;
-              const hasAlerts = tab.id === "assistant" && activeAlerts.length > 0;
+              const showCount = tab.id === "assistant" && unreadAlertsCount > 0;
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabChange(tab.id)}
                   className={`relative px-4 py-2 rounded-2xl font-black text-xs sm:text-sm shrink-0 flex items-center gap-2 transition ${
                     activeTab === tab.id
                       ? "bg-slate-900 text-white shadow-md shadow-slate-900/20 scale-105"
@@ -119,8 +138,10 @@ export default function Dashboard() {
                 >
                   <IconComp className={`w-4 h-4 ${activeTab === tab.id ? "text-emerald-400" : "text-slate-500"}`} />
                   <span>{tab.label}</span>
-                  {hasAlerts && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-ping absolute -top-1 -right-1" />
+                  {showCount && (
+                    <span className="min-w-[18px] h-[18px] px-1.5 rounded-full bg-rose-600 text-white text-[10px] font-black flex items-center justify-center shadow-md -ml-0.5">
+                      {unreadAlertsCount}
+                    </span>
                   )}
                 </button>
               );
@@ -137,7 +158,7 @@ export default function Dashboard() {
         {activeTab === "itinerary" && (
           <ItineraryView
             itinerary={currentItinerary}
-            onRegenerate={() => setActiveTab("planner")}
+            onRegenerate={() => handleTabChange("planner")}
             onOpenSOS={() => setSosOpen(true)}
           />
         )}
@@ -157,8 +178,8 @@ export default function Dashboard() {
       {toastAlert && (
         <AlertToast
           alert={toastAlert}
-          onDismiss={() => setToastAlert(null)}
-          onViewAssistant={() => setActiveTab("assistant")}
+          onDismiss={handleDismissToast}
+          onViewAssistant={() => handleTabChange("assistant")}
           onSwapRoute={handleSwapFromToast}
         />
       )}
