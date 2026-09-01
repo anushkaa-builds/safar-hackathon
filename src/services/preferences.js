@@ -25,6 +25,8 @@ export async function savePreferences(userId, data) {
       customMedicalInfo: data.customMedicalInfo || "",
       travelType: data.travelType || "solo",
       groupSize: data.groupSize || 1,
+      selectedTravel: data.selectedTravel || null,
+      selectedStay: data.selectedStay || null,
       updatedAt: new Date().toISOString()
     });
     console.log("Preferences successfully saved to Cloud Firestore!");

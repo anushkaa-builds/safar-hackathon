@@ -1,13 +1,21 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { 
   Calendar, MapPin, Clock, DollarSign, Users, ShieldAlert, Sparkles, 
-  ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, ChevronRight
+  ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, ChevronRight, Check
 } from "lucide-react";
+import { getTravelAndStayOptions } from "../services/itineraryGenerator";
 
 export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [activePlan, setActivePlan] = useState(itinerary);
   const [swapToast, setSwapToast] = useState("");
+  const [transitTab, setTransitTab] = useState("flight");
+
+  useEffect(() => {
+    if (itinerary) {
+      setActivePlan(itinerary);
+    }
+  }, [itinerary]);
 
   if (!activePlan || !activePlan.days || activePlan.days.length === 0) {
     return (
@@ -31,6 +39,46 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
 
   const currentDay = activePlan.days[selectedDayIndex] || activePlan.days[0];
   const dest = activePlan.destination;
+
+  // Fallbacks for options if not directly attached
+  const travelOptions = activePlan.availableTravelOptions || getTravelAndStayOptions(dest.name, activePlan.city || "Delhi");
+  const currentSelectedTravel = activePlan.selectedTravel || travelOptions.flights[0] || travelOptions.trains[0];
+  const currentSelectedStay = activePlan.selectedStay || activePlan.stayRecommendation || travelOptions.stays[0];
+
+  // Switch travel option directly from Itinerary view
+  function handleSelectTravel(opt) {
+    const updated = { ...activePlan };
+    updated.selectedTravel = opt;
+    if (updated.days && updated.days.length > 0) {
+      const day1 = updated.days[0];
+      if (day1.activities && day1.activities.length > 0) {
+        day1.activities[0].slot = `Morning (${opt.departureTime} - 12:30 PM)`;
+        day1.activities[0].title = `Departure from ${updated.city || "Origin"} via ${opt.provider || opt.mode} & Check-in at ${currentSelectedStay.name}`;
+        day1.activities[0].estCost = `${opt.price} (Included)`;
+        day1.activities[0].description = `Depart at ${opt.departureTime} (${opt.route}). Arrive, transfer to ${currentSelectedStay.name}, settle in, and acclimatize with local refreshments.`;
+      }
+    }
+    setActivePlan(updated);
+    setSwapToast(`✅ Travel updated to: ${opt.provider || opt.mode} (${opt.timing}, ${opt.price})`);
+    setTimeout(() => setSwapToast(""), 4000);
+  }
+
+  // Switch stay option directly from Itinerary view
+  function handleSelectStay(stayOpt) {
+    const updated = { ...activePlan };
+    updated.selectedStay = stayOpt;
+    updated.stayRecommendation = stayOpt;
+    if (updated.days && updated.days.length > 0) {
+      const day1 = updated.days[0];
+      if (day1.activities && day1.activities.length > 0) {
+        day1.activities[0].title = `Departure from ${updated.city || "Origin"} via ${currentSelectedTravel.provider || currentSelectedTravel.mode} & Check-in at ${stayOpt.name}`;
+        day1.activities[0].description = `Depart at ${currentSelectedTravel.departureTime} (${currentSelectedTravel.route}). Arrive, transfer to ${stayOpt.name}, settle in, and acclimatize with local refreshments.`;
+      }
+    }
+    setActivePlan(updated);
+    setSwapToast(`✅ Accommodation updated to: ${stayOpt.name} (${stayOpt.price})`);
+    setTimeout(() => setSwapToast(""), 4000);
+  }
 
   // Swap overcrowded activity with offbeat serene alternative
   function handleSwap(dayIndex, activityId) {
@@ -108,12 +156,77 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
             </div>
             <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
               <span className="text-white/70 block">Departure Timing</span>
-              <span className="font-black text-base text-white">{activePlan.departTime || "08:00 AM"}</span>
+              <span className="font-black text-base text-white">{currentSelectedTravel?.departureTime || activePlan.departTime || "08:00 AM"}</span>
             </div>
             <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
               <span className="text-white/70 block">Travel Party</span>
               <span className="font-black text-base text-amber-300 capitalize">{activePlan.travelType} ({activePlan.groupSize} {activePlan.groupSize === 1 ? "Person" : "People"})</span>
             </div>
+          </div>
+        </div>
+      </div>
+
+      {/* 🎯 CONFIRMED SELECTIONS SUMMARY BAR */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Selected Travel Card */}
+        <div className="p-5 rounded-3xl bg-blue-50 border-2 border-blue-300 shadow-sm space-y-2 relative">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">✈️</span>
+              <div>
+                <span className="text-[10px] font-black uppercase text-blue-800 bg-blue-200 px-2 py-0.5 rounded-md">
+                  Your Selected Travel Option
+                </span>
+                <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedTravel.provider || currentSelectedTravel.mode}</h4>
+              </div>
+            </div>
+            <span className="font-black text-sm text-emerald-800 bg-white border border-blue-200 px-2.5 py-1 rounded-xl shadow-sm">
+              {currentSelectedTravel.price}
+            </span>
+          </div>
+          <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
+            <p className="text-slate-900 font-bold">Route: {currentSelectedTravel.route}</p>
+            <p className="text-slate-600">Schedule: {currentSelectedTravel.timing} • {currentSelectedTravel.duration}</p>
+            <p className="text-slate-500 text-[11px]">{currentSelectedTravel.cabinClass || currentSelectedTravel.stops}</p>
+          </div>
+          <div className="pt-2 flex items-center justify-between">
+            <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Integrated in Day 1 Schedule
+            </span>
+            <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
+              {currentSelectedTravel.carbonScore || "Eco-Friendly"}
+            </span>
+          </div>
+        </div>
+
+        {/* Selected Stay Card */}
+        <div className="p-5 rounded-3xl bg-amber-50 border-2 border-amber-300 shadow-sm space-y-2 relative">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🏨</span>
+              <div>
+                <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200 px-2 py-0.5 rounded-md">
+                  Your Selected Accommodation
+                </span>
+                <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedStay.name}</h4>
+              </div>
+            </div>
+            <span className="text-xs font-black text-amber-900 bg-white border border-amber-200 px-2.5 py-1 rounded-xl shadow-sm">
+              ⭐ {currentSelectedStay.rating}
+            </span>
+          </div>
+          <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
+            <p className="text-emerald-800 font-bold">Price: {currentSelectedStay.price}</p>
+            <p className="text-slate-600 text-[11px] line-clamp-1">{currentSelectedStay.description}</p>
+            <p className="text-slate-500 text-[10px]">Tier: {currentSelectedStay.type}</p>
+          </div>
+          <div className="pt-2 flex items-center justify-between">
+            <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Integrated in Day Check-in
+            </span>
+            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
+              Confirmed Stay
+            </span>
           </div>
         </div>
       </div>
@@ -268,66 +381,156 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
         </div>
       </div>
 
-      {/* Multimodal Transport & Stays Grid */}
+      {/* Multimodal Transport & Stays Grid with Interactive Multiple Options */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Multimodal Transit Breakdown */}
+        {/* Multimodal Transit Breakdown with Multiple Flight/Train Selection */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-xl space-y-4">
-          <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
-              🚆
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
+                ✈️
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 text-base">Travel & Transit Options</h3>
+                <p className="text-xs text-slate-500 font-semibold">Multiple flights and trains. Switch selection anytime:</p>
+              </div>
             </div>
-            <div>
-              <h3 className="font-black text-slate-900 text-base">Multimodal Transportation</h3>
-              <p className="text-xs text-slate-500 font-semibold">Origin & intra-city connectivity</p>
+
+            {/* Sub-tab switcher for Itinerary view */}
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-black">
+              <button
+                type="button"
+                onClick={() => setTransitTab("flight")}
+                className={`px-2 py-1 rounded-lg transition ${
+                  transitTab === "flight" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"
+                }`}
+              >
+                Flights
+              </button>
+              <button
+                type="button"
+                onClick={() => setTransitTab("train")}
+                className={`px-2 py-1 rounded-lg transition ${
+                  transitTab === "train" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"
+                }`}
+              >
+                Trains
+              </button>
+              <button
+                type="button"
+                onClick={() => setTransitTab("bus")}
+                className={`px-2 py-1 rounded-lg transition ${
+                  transitTab === "bus" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"
+                }`}
+              >
+                Buses
+              </button>
             </div>
           </div>
 
           <div className="space-y-3">
-            {activePlan.transitModes.map((t, idx) => (
-              <div key={idx} className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <span className="font-black text-xs text-slate-900">{t.mode}</span>
-                  <span className="font-black text-xs text-emerald-700">{t.estCost}</span>
+            {(transitTab === "flight" ? travelOptions.flights : transitTab === "train" ? travelOptions.trains : travelOptions.buses).map((opt) => {
+              const isSelected = currentSelectedTravel?.id === opt.id;
+              return (
+                <div 
+                  key={opt.id} 
+                  className={`p-3.5 rounded-2xl border-2 transition space-y-2 ${
+                    isSelected 
+                      ? "bg-blue-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-400" 
+                      : "bg-slate-50/70 border-slate-200 hover:border-blue-300"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <span className="font-black text-xs text-slate-900 block">{opt.provider || opt.mode}</span>
+                      <span className="text-[11px] text-slate-600 font-medium">{opt.timing} • {opt.duration}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-black text-xs text-emerald-700 block">{opt.price}</span>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectTravel(opt)}
+                        className={`mt-1 px-3 py-1 rounded-xl text-[10px] font-black transition ${
+                          isSelected
+                            ? "bg-emerald-600 text-white shadow-xs cursor-default"
+                            : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300"
+                        }`}
+                      >
+                        {isSelected ? "✓ Selected" : "Select"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/50 text-[9px] text-slate-600 font-bold">
+                    <span>{opt.route}</span>
+                    <span>•</span>
+                    <span>{opt.cabinClass || opt.stops}</span>
+                    {opt.tags?.map((t, i) => (
+                      <span key={i} className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
+                        {t}
+                      </span>
+                    ))}
+                  </div>
                 </div>
-                <p className="text-[11px] text-slate-600 font-medium">{t.details} • {t.duration}</p>
-                <div className="flex gap-1.5">
-                  {t.tags.map((tag, i) => (
-                    <span key={i} className="text-[9px] font-bold px-2 py-0.5 rounded bg-slate-200 text-slate-700">
-                      {tag}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
 
-        {/* Stay & Hotel Recommendations */}
+        {/* Stay & Hotel Recommendations with Select Buttons */}
         <div className="bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-xl space-y-4">
           <div className="flex items-center gap-2.5">
             <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-black">
               🏨
             </div>
             <div>
-              <h3 className="font-black text-slate-900 text-base">Recommended Stay</h3>
-              <p className="text-xs text-slate-500 font-semibold">Matched to your ₹{activePlan.budgetBreakdown.stay.toLocaleString()} stay budget</p>
+              <h3 className="font-black text-slate-900 text-base">Accommodation Options</h3>
+              <p className="text-xs text-slate-500 font-semibold">Select your preferred hotel or resort:</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-200 space-y-2">
-            <div className="flex justify-between items-start">
-              <div>
-                <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200 px-2 py-0.5 rounded-md">
-                  {activePlan.stayRecommendation.type}
-                </span>
-                <h4 className="font-black text-base text-slate-900 mt-1">{activePlan.stayRecommendation.name}</h4>
-              </div>
-              <span className="text-xs font-black text-amber-900 bg-white px-2.5 py-1 rounded-lg shadow-sm">
-                ⭐ {activePlan.stayRecommendation.rating}
-              </span>
-            </div>
-            <p className="text-xs font-bold text-slate-700">Price: {activePlan.stayRecommendation.price}</p>
-            <p className="text-[11px] text-slate-600 font-medium">Includes complimentary regional breakfast, sanitized rooms, and local mountain view.</p>
+          <div className="space-y-3">
+            {travelOptions.stays.map((stay) => {
+              const isSelected = currentSelectedStay?.id === stay.id;
+              return (
+                <div 
+                  key={stay.id} 
+                  className={`p-3.5 rounded-2xl border-2 transition space-y-2 ${
+                    isSelected 
+                      ? "bg-amber-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-400" 
+                      : "bg-slate-50/70 border-slate-200 hover:border-amber-300"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-2">
+                    <div>
+                      <span className="text-[9px] font-black uppercase text-amber-800 bg-amber-200 px-1.5 py-0.5 rounded">
+                        {stay.type}
+                      </span>
+                      <h4 className="font-black text-xs text-slate-900 mt-1">{stay.name}</h4>
+                      <p className="text-[11px] text-emerald-800 font-bold mt-0.5">{stay.price}</p>
+                    </div>
+                    <div className="text-right shrink-0">
+                      <span className="text-[10px] font-black text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-200 block mb-1.5">
+                        ⭐ {stay.rating}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => handleSelectStay(stay)}
+                        className={`px-3 py-1 rounded-xl text-[10px] font-black transition ${
+                          isSelected
+                            ? "bg-emerald-600 text-white shadow-xs cursor-default"
+                            : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300"
+                        }`}
+                      >
+                        {isSelected ? "✓ Selected" : "Select"}
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-600 font-medium line-clamp-1">{stay.description}</p>
+                </div>
+              );
+            })}
           </div>
 
           {/* Budget Breakdown Chart */}

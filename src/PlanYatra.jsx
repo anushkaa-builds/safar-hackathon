@@ -1,8 +1,12 @@
-import { useState } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { savePreferences } from "./services/preferences";
-import { generateSmartItinerary } from "./services/itineraryGenerator";
+import { generateSmartItinerary, getTravelAndStayOptions } from "./services/itineraryGenerator";
 import DestinationPicker from "./DestinationPicker";
-import { Sparkles, MapPin, Compass, Calendar, Clock, HeartPulse, DollarSign, Users, ArrowRight, ExternalLink } from "lucide-react";
+import { 
+  Sparkles, MapPin, Compass, Calendar, Clock, HeartPulse, 
+  DollarSign, Users, ArrowRight, ExternalLink, Plane, Train, 
+  Bus, CheckCircle2, Hotel, ShieldCheck, Check
+} from "lucide-react";
 
 const interestOptions = [
   "🌸 Lakes & Valleys",
@@ -38,18 +42,19 @@ export default function PlanYatra({ onItineraryGenerated }) {
   const [age, setAge] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [gender, setGender] = useState("");
-  const [currentCity, setCurrentCity] = useState("");
-  const [destination, setDestination] = useState("");
+  const [currentCity, setCurrentCity] = useState("Delhi");
+  const [destination, setDestination] = useState("Kashmir");
 
-  const [durationPreset, setDurationPreset] = useState(null);
-  const [customDays, setCustomDays] = useState("");
-  const [budget, setBudget] = useState(0);  
+  const [durationPreset, setDurationPreset] = useState(5);
+  const [customDays, setCustomDays] = useState("5");
+  const [budget, setBudget] = useState(25000);
 
-  const [selectedInterests, setSelectedInterests] = useState([""]);
+  const [selectedInterests, setSelectedInterests] = useState(["🌸 Lakes & Valleys", "🏔️ Mountain Snow"]);
   const [customInterest, setCustomInterest] = useState("");
 
-  const [departDate, setDepartDate] = useState("0000-00-00");
-  const [departTime, setDepartTime] = useState("08:00");
+  const todayStr = new Date().toISOString().split("T")[0];
+  const [departDate, setDepartDate] = useState(todayStr);
+  const [departTime, setDepartTime] = useState("06:15");
 
   const [selectedMedicalIssues, setSelectedMedicalIssues] = useState(["None (Fit to travel)"]);
   const [customMedicalInfo, setCustomMedicalInfo] = useState("");
@@ -57,8 +62,30 @@ export default function PlanYatra({ onItineraryGenerated }) {
   const [travelType, setTravelType] = useState("solo");
   const [groupSize, setGroupSize] = useState(1);
 
+  // Travel & Stay Options State
+  const [travelTab, setTravelTab] = useState("flight"); // 'flight' | 'train' | 'bus'
+  const [selectedTravel, setSelectedTravel] = useState(null);
+  const [selectedStay, setSelectedStay] = useState(null);
+
   const [status, setStatus] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
+
+  // Compute available Travel & Stay Options dynamically based on Destination & Origin
+  const availableOptions = useMemo(() => {
+    return getTravelAndStayOptions(destination || "Kashmir", currentCity || "Delhi");
+  }, [destination, currentCity]);
+
+  // Keep selected travel and stay synced if not already selected or if destination changes
+  useEffect(() => {
+    if (!selectedTravel || (!availableOptions.flights.some(f => f.id === selectedTravel.id) && !availableOptions.trains.some(t => t.id === selectedTravel.id) && !availableOptions.buses.some(b => b.id === selectedTravel.id))) {
+      setSelectedTravel(availableOptions.flights[0] || availableOptions.trains[0]);
+    }
+    if (!selectedStay || !availableOptions.stays.some(s => s.id === selectedStay.id)) {
+      if (budget > 70000) setSelectedStay(availableOptions.stays[2]);
+      else if (budget > 35000) setSelectedStay(availableOptions.stays[1]);
+      else setSelectedStay(availableOptions.stays[0]);
+    }
+  }, [availableOptions, budget]);
 
   function toggleInterest(tag) {
     setSelectedInterests((prev) =>
@@ -72,8 +99,8 @@ export default function PlanYatra({ onItineraryGenerated }) {
       return;
     }
     setSelectedMedicalIssues((prev) => {
-      const filtered = prev.filter(i => i !== "None (Fit to travel)");
-      return filtered.includes(issue) ? filtered.filter(i => i !== issue) : [...filtered, issue];
+      const filtered = prev.filter((i) => i !== "None (Fit to travel)");
+      return filtered.includes(issue) ? filtered.filter((i) => i !== issue) : [...filtered, issue];
     });
   }
 
@@ -92,49 +119,59 @@ export default function PlanYatra({ onItineraryGenerated }) {
     }
   }
 
-  function handleBudgetChange(inrValue) {
-    setBudget(value === "" ? 0 :
-  Number(Value));
-  }
-
   function handlePreFill(presetName) {
     if (presetName === "kashmir") {
       setName("Anushka Yadav");
-      setAge(20);
+      setAge(21);
       setGender("Female");
       setCurrentCity("Delhi");
       setDestination("Kashmir");
       handleDurationPreset(5);
-      setBudget(5000);
+      setBudget(35000);
       setSelectedInterests(["🌸 Lakes & Valleys", "🏔️ Mountain Snow"]);
       setTravelType("solo");
-      setDepartTime("07:30");
+      setDepartTime("06:15");
       setSelectedMedicalIssues(["None (Fit to travel)"]);
+      const opts = getTravelAndStayOptions("Kashmir", "Delhi");
+      setSelectedTravel(opts.flights[0]);
+      setSelectedStay(opts.stays[1]);
     } else if (presetName === "manali") {
       setName("Nehal & Friends");
+      setAge(23);
+      setGender("Male");
+      setCurrentCity("Delhi");
       setDestination("Manali");
       handleDurationPreset(4);
-      setBudget(15000);
+      setBudget(25000);
       setSelectedInterests(["🏔️ Mountain Snow", "🥾 Nature Trekking"]);
       setTravelType("group");
       setGroupSize(3);
       setDepartTime("06:00");
       setSelectedMedicalIssues(["🤢 Motion / Mountain sickness (AMS)"]);
+      const opts = getTravelAndStayOptions("Manali", "Delhi");
+      setSelectedTravel(opts.trains[0]);
+      setSelectedStay(opts.stays[0]);
     } else if (presetName === "goa") {
       setName("Vaibhavi");
+      setAge(22);
+      setGender("Female");
+      setCurrentCity("Mumbai");
       setDestination("Goa");
       handleDurationPreset(3);
-      setBudget(3000);
+      setBudget(18000);
       setSelectedInterests(["🌊 Coastal Beaches", "🍛 Authentic Cuisine"]);
       setTravelType("solo");
-      setDepartTime("09:00");
+      setDepartTime("08:40");
       setSelectedMedicalIssues(["None (Fit to travel)"]);
+      const opts = getTravelAndStayOptions("Goa", "Mumbai");
+      setSelectedTravel(opts.trains[1]);
+      setSelectedStay(opts.stays[1]);
     }
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setStatus("Synthesizing AI Itinerary & Checking GIS Risk...");
+    setStatus("Synthesizing AI Itinerary with your selected Travel & Stay...");
     setIsGenerating(true);
 
     const finalHolidays = Number(customDays) || durationPreset || 3;
@@ -148,36 +185,39 @@ export default function PlanYatra({ onItineraryGenerated }) {
     const userId = getOrCreateUserId();
 
     const data = {
-      name,
-      age: Number(age),
-      gender,
-      city: currentCity,
-      destination,
+      name: name || "Yatri",
+      age: Number(age) || 24,
+      gender: gender || "Male",
+      city: currentCity || "Delhi",
+      destination: destination || "Kashmir",
       holidays: finalHolidays,
-      budget,
+      budget: Number(budget) || 25000,
       interests: finalInterests,
       departDate,
-      departTime,
+      departTime: selectedTravel?.departureTime || departTime || "08:00 AM",
       medicalIssues: selectedMedicalIssues,
       customMedicalInfo,
       travelType,
-      groupSize: travelType === "group" ? Number(groupSize) : 3,
+      groupSize: travelType === "group" ? Math.max(2, Number(groupSize) || 2) : 1,
+      selectedTravel: selectedTravel || availableOptions.flights[0] || availableOptions.trains[0],
+      selectedStay: selectedStay || availableOptions.stays[0],
     };
 
     await savePreferences(userId, data);
     const itinerary = generateSmartItinerary(data);
 
     setIsGenerating(false);
-    setStatus("✅ Plan ready! Redirecting to My Itinerary...");
+    setStatus("✅ Plan ready! Redirecting to Final Itinerary...");
 
+    // Automatically redirect to the Final Itinerary / Results page
     if (onItineraryGenerated) {
       setTimeout(() => {
         onItineraryGenerated(itinerary);
-      }, 500);
+      }, 400);
     }
   }
 
-  const budgetInr = budget;
+  const budgetInr = Number(budget) || 0;
   const mapsEmbedUrl = `https://maps.google.com/maps?q=${encodeURIComponent(destination || "India")}&t=&z=12&ie=UTF8&iwloc=&output=embed`;
   const googleMapsLink = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(destination || "India")}`;
 
@@ -208,7 +248,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
             </div>
           </div>
           <p className="text-xs sm:text-sm text-slate-600 font-semibold">
-            Fill in your travel preferences to generate a multimodal, crowd-optimized itinerary with real-time hazard detection.
+            Fill in your travel preferences, choose your preferred Flight/Train and Stay, and generate a customized crowd-optimized itinerary.
           </p>
         </div>
 
@@ -276,7 +316,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
                   value={destination}
                   onChange={(e) => setDestination(e.target.value)}
                   className="w-full bg-slate-50 border-2 border-slate-300 shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 rounded-2xl px-4 py-3 text-sm font-semibold pr-24"
-                  placeholder="Type any place (e.g. Manali, Ooty, Kashmir...)"
+                  placeholder="Type any place (e.g. Kashmir, Manali, Goa, Jaipur...)"
                   required
                 />
                 <button
@@ -288,7 +328,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
                 </button>
               </div>
               <p className="text-[11px] text-slate-500 font-semibold">
-                ✨ You can type any city/region manually or click BROWSE to select from popular circuits.
+                ✨ Type any destination or click BROWSE to select from curated circuits.
               </p>
               <DestinationPicker
                 isOpen={pickerOpen}
@@ -311,7 +351,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
 
           {/* Interactive Google Maps Preview */}
           {destination && (
-            <div className="rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-100 relative h-48 sm:h-56">
+            <div className="rounded-2xl overflow-hidden border-2 border-slate-200 shadow-inner bg-slate-100 relative h-44 sm:h-52">
               <iframe
                 title="Google Maps Location"
                 width="100%"
@@ -325,8 +365,257 @@ export default function PlanYatra({ onItineraryGenerated }) {
               />
               <div className="absolute bottom-2 left-2 bg-slate-900/80 backdrop-blur-md text-white px-3 py-1 rounded-xl text-[10px] font-black flex items-center gap-1.5 shadow-md">
                 <MapPin className="w-3 h-3 text-emerald-400" />
-                <span>Google Maps Location: {destination}</span>
+                <span>Location: {destination}</span>
               </div>
+            </div>
+          )}
+        </div>
+
+        {/* ✈️ TRAVEL SELECTION (Multiple Flights & Trains with Select Buttons) */}
+        <div className="space-y-4 p-5 rounded-3xl bg-blue-50/40 border-2 border-blue-200">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="flex items-center gap-2.5">
+              <div className="w-10 h-10 rounded-2xl bg-blue-600 text-white flex items-center justify-center font-black shrink-0 shadow-md">
+                ✈️
+              </div>
+              <div>
+                <label className="block font-black text-slate-900 text-base sm:text-lg">
+                  Travel & Transit Selection
+                </label>
+                <p className="text-[11px] text-slate-600 font-semibold">
+                  Multiple flight and train options for {currentCity || "Origin"} ➔ {destination || "Destination"}. Select your preferred option:
+                </p>
+              </div>
+            </div>
+
+            {/* Travel Mode Switcher Tabs */}
+            <div className="flex items-center gap-1.5 bg-white p-1.5 rounded-2xl border border-blue-200 shadow-sm text-xs font-black">
+              <button
+                type="button"
+                onClick={() => setTravelTab("flight")}
+                className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition ${
+                  travelTab === "flight"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <Plane className="w-3.5 h-3.5" />
+                <span>Flights ({availableOptions.flights.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTravelTab("train")}
+                className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition ${
+                  travelTab === "train"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <Train className="w-3.5 h-3.5" />
+                <span>Trains ({availableOptions.trains.length})</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setTravelTab("bus")}
+                className={`px-3 py-1.5 rounded-xl flex items-center gap-1.5 transition ${
+                  travelTab === "bus"
+                    ? "bg-blue-600 text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100"
+                }`}
+              >
+                <Bus className="w-3.5 h-3.5" />
+                <span>Buses ({availableOptions.buses.length})</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Cards for Active Travel Mode */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
+            {(travelTab === "flight" ? availableOptions.flights : travelTab === "train" ? availableOptions.trains : availableOptions.buses).map((opt) => {
+              const isSelected = selectedTravel?.id === opt.id;
+              return (
+                <div
+                  key={opt.id}
+                  onClick={() => setSelectedTravel(opt)}
+                  className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? "bg-white border-emerald-600 shadow-lg ring-2 ring-emerald-400"
+                      : "bg-white/80 border-slate-200 hover:border-blue-400 hover:bg-white"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-blue-700 bg-blue-100 px-2 py-0.5 rounded-md">
+                          {opt.type === "flight" ? "Flight" : opt.type === "train" ? "Rail Express" : "Coach"}
+                        </span>
+                        <h4 className="font-black text-sm text-slate-900 mt-1">{opt.provider}</h4>
+                      </div>
+                      <span className="font-black text-sm text-emerald-800 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-xl">
+                        {opt.price}
+                      </span>
+                    </div>
+
+                    <div className="text-xs text-slate-700 font-semibold space-y-1">
+                      <p className="flex items-center gap-1 text-slate-900 font-bold">
+                        <Clock className="w-3.5 h-3.5 text-blue-600" />
+                        <span>{opt.timing}</span>
+                      </p>
+                      <p className="text-[11px] text-slate-500">
+                        {opt.duration} • {opt.stops || opt.cabinClass}
+                      </p>
+                      {opt.baggage && (
+                        <p className="text-[10px] text-slate-600 font-medium bg-slate-100 p-1 rounded-lg">
+                          ✓ {opt.baggage}
+                        </p>
+                      )}
+                    </div>
+
+                    <div className="flex flex-wrap gap-1 pt-1">
+                      {opt.tags?.map((tag, i) => (
+                        <span key={i} className="text-[9px] font-bold px-1.5 py-0.5 rounded bg-blue-50 text-blue-800 border border-blue-100">
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Clear Select Button */}
+                  <div className="pt-3 mt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedTravel(opt);
+                      }}
+                      className={`w-full py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition ${
+                        isSelected
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-300"
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>✓ Selected</span>
+                        </>
+                      ) : (
+                        <span>Select</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {selectedTravel && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-slate-800 font-bold">
+                  Active Travel Selection: <strong className="text-emerald-950 font-black">{selectedTravel.mode}</strong> ({selectedTravel.timing}, {selectedTravel.price})
+                </span>
+              </div>
+              <span className="text-[10px] font-black uppercase bg-emerald-600 text-white px-2 py-0.5 rounded-md">Locked for Plan</span>
+            </div>
+          )}
+        </div>
+
+        {/* 🏨 STAY & ACCOMMODATION SELECTION */}
+        <div className="space-y-4 p-5 rounded-3xl bg-amber-50/40 border-2 border-amber-200">
+          <div className="flex items-center gap-2.5">
+            <div className="w-10 h-10 rounded-2xl bg-amber-600 text-white flex items-center justify-center font-black shrink-0 shadow-md">
+              🏨
+            </div>
+            <div>
+              <label className="block font-black text-slate-900 text-base sm:text-lg">
+                Accommodation & Stay Selection
+              </label>
+              <p className="text-[11px] text-slate-600 font-semibold">
+                Choose your preferred accommodation tier in {destination || "Destination"}. Select any stay below:
+              </p>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5 pt-1">
+            {availableOptions.stays.map((stay) => {
+              const isSelected = selectedStay?.id === stay.id;
+              return (
+                <div
+                  key={stay.id}
+                  onClick={() => setSelectedStay(stay)}
+                  className={`relative p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between ${
+                    isSelected
+                      ? "bg-white border-emerald-600 shadow-lg ring-2 ring-emerald-400"
+                      : "bg-white/80 border-slate-200 hover:border-amber-400 hover:bg-white"
+                  }`}
+                >
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-100 px-2 py-0.5 rounded-md">
+                          {stay.type}
+                        </span>
+                        <h4 className="font-black text-sm text-slate-900 mt-1">{stay.name}</h4>
+                      </div>
+                      <span className="text-xs font-black text-amber-900 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-lg shadow-sm">
+                        ⭐ {stay.rating}
+                      </span>
+                    </div>
+
+                    <p className="text-xs font-extrabold text-emerald-800">{stay.price}</p>
+                    <p className="text-[11px] text-slate-600 font-medium line-clamp-2">{stay.description}</p>
+
+                    <div className="space-y-1 pt-1">
+                      {stay.amenities?.slice(0, 3).map((am, i) => (
+                        <p key={i} className="text-[10px] text-slate-700 font-semibold flex items-center gap-1">
+                          <span className="text-emerald-600 font-black">✓</span> {am}
+                        </p>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Clear Select Button */}
+                  <div className="pt-3 mt-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedStay(stay);
+                      }}
+                      className={`w-full py-2 px-3 rounded-xl font-black text-xs flex items-center justify-center gap-1.5 transition ${
+                        isSelected
+                          ? "bg-emerald-600 text-white shadow-sm"
+                          : "bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-700 border border-slate-300"
+                      }`}
+                    >
+                      {isSelected ? (
+                        <>
+                          <Check className="w-3.5 h-3.5" />
+                          <span>✓ Selected</span>
+                        </>
+                      ) : (
+                        <span>Select</span>
+                      )}
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+
+          {selectedStay && (
+            <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-2xl flex items-center justify-between text-xs">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                <span className="text-slate-800 font-bold">
+                  Active Stay Selection: <strong className="text-emerald-950 font-black">{selectedStay.name}</strong> ({selectedStay.price})
+                </span>
+              </div>
+              <span className="text-[10px] font-black uppercase bg-emerald-600 text-white px-2 py-0.5 rounded-md">Locked for Plan</span>
             </div>
           )}
         </div>
@@ -368,7 +657,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
           </p>
         </div>
 
-        {/* Estimated Total Budget (Slider + Direct Manual Amount Fill Box) */}
+        {/* Estimated Total Budget */}
         <div className="space-y-4 p-5 rounded-2xl bg-emerald-50/50 border border-emerald-200">
           <div className="flex flex-wrap justify-between items-center gap-2">
             <div>
@@ -382,20 +671,22 @@ export default function PlanYatra({ onItineraryGenerated }) {
                 type="number"
                 min="0"
                 max="500000"
-                step="any"
                 value={budget === 0 ? "" : budget}
-                placeholder="Enter Budget in INR"
-                onChange={(e) => { const value = e.target.value; setBudget(value === "" ? 0 : Number(value));}}
+                placeholder="Budget in INR"
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setBudget(val === "" ? 0 : Number(val));
+                }}
                 className="w-28 text-slate-900 font-black text-sm sm:text-base focus:outline-none"
               />
-              <span className="text-xs font-bold text-slate-500">({budget})</span>
+              <span className="text-xs font-bold text-slate-500">(INR)</span>
             </div>
           </div>
 
           <input
             type="range"
             min="0"
-            max="500000"
+            max="200000"
             step="500"
             value={budget}
             onChange={(e) => setBudget(Number(e.target.value))}
@@ -439,7 +730,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
 
           <div className="space-y-2">
             <label className="block font-black text-slate-900 text-sm flex items-center gap-1.5">
-              <Clock className="w-4 h-4 text-emerald-600" /> Departure Time
+              <Clock className="w-4 h-4 text-emerald-600" /> Departure Time (Prefers Selected Transit)
             </label>
             <input
               type="time"
@@ -554,7 +845,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
             className="w-full py-4 bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-base sm:text-lg rounded-2xl shadow-xl shadow-emerald-600/30 flex items-center justify-center gap-2 transition"
           >
             {isGenerating ? (
-              <span>⚡ Synthesizing AI Multimodal Plan...</span>
+              <span>⚡ Synthesizing AI Multimodal Plan with Your Selections...</span>
             ) : (
               <>
                 <span>Generate Optimized Yatra Plan</span>
