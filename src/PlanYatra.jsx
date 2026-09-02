@@ -46,14 +46,13 @@ export default function PlanYatra({ onItineraryGenerated }) {
 
   const [durationPreset, setDurationPreset] = useState(5);
   const [customDays, setCustomDays] = useState("5");
-  const [budget, setBudget] = useState(25000);
+  const [budget, setBudget] = useState("");
 
   const [selectedInterests, setSelectedInterests] = useState(["🌸 Lakes & Valleys", "🏔️ Mountain Snow"]);
   const [customInterest, setCustomInterest] = useState("");
 
-  const todayStr = new Date().toISOString().split("T")[0];
-  const [departDate, setDepartDate] = useState(todayStr);
-  const [departTime, setDepartTime] = useState("08:00");
+  const [departDate, setDepartDate] = useState("");
+  const [departTime, setDepartTime] = useState("");
 
   const [selectedMedicalIssues, setSelectedMedicalIssues] = useState(["None (Fit to travel)"]);
   const [customMedicalInfo, setCustomMedicalInfo] = useState("");
@@ -389,11 +388,11 @@ export default function PlanYatra({ onItineraryGenerated }) {
                 type="number"
                 min="0"
                 max="500000"
-                value={budget === 0 ? "" : budget}
+                value={budget}
                 placeholder="Budget in INR"
                 onChange={(e) => {
                   const val = e.target.value;
-                  setBudget(val === "" ? 0 : Number(val));
+                  setBudget(val === "" ? "" : Number(val));
                 }}
                 className="w-28 text-slate-900 font-black text-sm sm:text-base focus:outline-none"
               />
@@ -406,7 +405,7 @@ export default function PlanYatra({ onItineraryGenerated }) {
             min="0"
             max="200000"
             step="500"
-            value={budget}
+            value={Number(budget) || 0}
             onChange={(e) => setBudget(Number(e.target.value))}
             className="w-full h-3 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
           />
