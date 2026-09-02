@@ -43,7 +43,13 @@ const SAFETY_OPTIONS = [
   "10/10 Excellent & Highly Secure",
   "9/10 Very Safe",
   "8/10 Safe with Normal Caution",
-  "7/10 Exercise Caution"
+  "7/10 Exercise Caution",
+  "6/10 Moderate Caution Advised",
+  "5/10 Average Safety",
+  "4/10 Significant Concerns",
+  "3/10 High Risk",
+  "2/10 Unsafe",
+  "1/10 Critical Danger"
 ];
 
 const SUGGESTED_TAGS = [
@@ -62,11 +68,16 @@ const SUGGESTED_TAGS = [
 const AVATAR_OPTIONS = ["🎒", "🏔️", "🏄‍♂️", "📸", "🌿", "⛺", "🧭", "🧘‍♂️", "👨‍💼", "👩‍❤️‍👨"];
 
 const RATING_DESCRIPTIONS = {
-  5: "⭐ 5.0 - Outstanding! Exceeded all expectations",
-  4: "⭐ 4.0 - Very Good! Thoroughly enjoyed the experience",
-  3: "⭐ 3.0 - Average! Decent with a few minor hiccups",
-  2: "⭐ 2.0 - Below Expectations! Needs improvement",
-  1: "⭐ 1.0 - Disappointing! Major issues encountered"
+  10: "⭐ 10/10 - Exceptional! Exceeded all expectations",
+  9: "⭐ 9/10 - Outstanding experience",
+  8: "⭐ 8/10 - Very Good! Thoroughly enjoyed",
+  7: "⭐ 7/10 - Good with minor hiccups",
+  6: "⭐ 6/10 - Decent / Above Average",
+  5: "⭐ 5/10 - Average experience",
+  4: "⭐ 4/10 - Below expectations",
+  3: "⭐ 3/10 - Poor experience",
+  2: "⭐ 2/10 - Very poor / Major issues",
+  1: "⭐ 1/10 - Disappointing / Critical problems"
 };
 
 export default function ReviewsView({ activeDestination = "Kashmir" }) {
@@ -86,7 +97,7 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
   const [author, setAuthor] = useState("");
   const [destination, setDestination] = useState(activeDestination || "Kashmir");
   const [customDestination, setCustomDestination] = useState("");
-  const [rating, setRating] = useState(5);
+  const [rating, setRating] = useState("");
   const [hoverRating, setHoverRating] = useState(0);
   const [crowdRating, setCrowdRating] = useState("Low (Offbeat Peaceful)");
   const [safetyScore, setSafetyScore] = useState("10/10 Excellent & Highly Secure");
@@ -138,7 +149,9 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
 
   async function handleSubmitReview(e) {
     e.preventDefault();
-    if (!author.trim() || !comment.trim()) return;
+    if (!author.trim() || !comment.trim() || !rating) return;
+    const numericRating = Number(rating);
+    if (isNaN(numericRating) || numericRating < 1 || numericRating > 10) return;
 
     setIsSubmitting(true);
     const finalDest = destination === "Other" ? (customDestination.trim() || "Offbeat Circuit") : destination;
@@ -146,7 +159,7 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
     const newRev = {
       author: author.trim(),
       destination: finalDest,
-      rating: Number(rating),
+      rating: numericRating,
       crowdRating,
       safetyScore,
       budgetSpent: budgetSpent.trim() || "Budget Friendly",
@@ -169,6 +182,7 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
       });
       setModalOpen(false);
       setComment("");
+      setRating("");
       setSelectedTags(["Offbeat Gem", "Eco-Friendly"]);
       await loadReviews(filterDest);
 
@@ -207,17 +221,18 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
     let safeCount = 0;
 
     reviews.forEach(r => {
-      const val = Math.min(5, Math.max(1, Math.round(r.rating || 5)));
-      sum += Number(r.rating || 5);
-      breakdown[val] = (breakdown[val] || 0) + 1;
-      if (r.safetyScore && !r.safetyScore.includes("7/10")) {
+      const rawRating = Number(r.rating || 5);
+      const starVal = rawRating > 5 ? Math.min(5, Math.max(1, Math.round(rawRating / 2))) : Math.min(5, Math.max(1, Math.round(rawRating)));
+      sum += rawRating > 5 ? rawRating / 2 : rawRating;
+      breakdown[starVal] = (breakdown[starVal] || 0) + 1;
+      if (r.safetyScore && (r.safetyScore.includes("10/10") || r.safetyScore.includes("9/10") || r.safetyScore.includes("8/10") || r.safetyScore.includes("7/10"))) {
         safeCount++;
-      } else {
+      } else if (!r.safetyScore) {
         safeCount++;
       }
     });
 
-    const avg = (sum / total).toFixed(1);
+    const avg = total > 0 ? (sum / total).toFixed(1) : "5.0";
     const safePercent = Math.round((safeCount / total) * 100) + "%";
 
     return { avgRating: avg, total, breakdown, safePercent };
@@ -230,7 +245,11 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
     // Filter by Rating
     if (filterRating !== "all") {
       const minRate = Number(filterRating);
-      list = list.filter(r => (r.rating || 5) >= minRate);
+      list = list.filter(r => {
+        const val = Number(r.rating || 0);
+        const normalized = val <= 5 && minRate > 5 ? val * 2 : val;
+        return normalized >= minRate;
+      });
     }
 
     // Filter by Search Query
@@ -274,7 +293,7 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
                   Review Published & Synced to Cloud
                 </span>
                 <span className="text-amber-300 font-black text-xs">
-                  {"★".repeat(submissionSuccess.rating)} ({submissionSuccess.rating}/5)
+                  {"★".repeat(Math.min(10, Math.max(1, Number(submissionSuccess.rating || 1))))} ({submissionSuccess.rating}/10)
                 </span>
               </div>
               <h3 className="font-black text-lg">
@@ -444,9 +463,11 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
               className="w-full px-3 py-2.5 bg-slate-50 border border-slate-200 rounded-2xl font-bold text-slate-800 text-xs focus:outline-none focus:border-teal-500"
             >
               <option value="all">⭐ All Ratings</option>
-              <option value="5">⭐⭐⭐⭐⭐ 5 Stars Only</option>
-              <option value="4">⭐⭐⭐⭐ 4+ Stars</option>
-              <option value="3">⭐⭐⭐ 3+ Stars</option>
+              <option value="9">⭐⭐⭐⭐⭐ 9+ Rating</option>
+              <option value="7">⭐⭐⭐⭐ 7+ Rating</option>
+              <option value="5">⭐⭐⭐ 5+ Rating</option>
+              <option value="3">⭐⭐ 3+ Rating</option>
+              <option value="1">⭐ 1+ Rating</option>
             </select>
           </div>
 
@@ -545,14 +566,14 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
                           <Star
                             key={s}
                             className={`w-3.5 h-3.5 ${
-                              s <= Math.round(ratingNum)
+                              s <= Math.round(ratingNum > 5 ? ratingNum / 2 : ratingNum)
                                 ? "fill-amber-400 text-amber-400"
                                 : "text-slate-300"
                             }`}
                           />
                         ))}
                       </div>
-                      <span className="ml-1 text-slate-900">{ratingNum.toFixed(1)}</span>
+                      <span className="ml-1 text-slate-900">{ratingNum > 5 ? `${ratingNum}/10` : `${ratingNum.toFixed(1)}/5`}</span>
                     </div>
                   </div>
 
@@ -719,21 +740,21 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
                 </div>
               )}
 
-              {/* WORKING STAR & NUMERIC RATING INPUT */}
+              {/* WORKING STAR & NUMERIC RATING INPUT (1 to 10) */}
               <div className="p-4 rounded-2xl bg-amber-50/70 border-2 border-amber-200/80 space-y-2.5">
                 <div className="flex items-center justify-between">
                   <label className="block text-slate-900 font-black text-xs">
-                    Overall Rating (1 to 5 Stars) <span className="text-rose-500">*</span>
+                    Overall Rating (1 to 10) <span className="text-rose-500">*</span>
                   </label>
                   <span className="text-amber-800 font-black text-sm">
-                    {rating}.0 / 5.0 ⭐
+                    {rating ? `${rating} / 10 ⭐` : "Select Rating"}
                   </span>
                 </div>
 
-                {/* Interactive Star Buttons */}
-                <div className="flex items-center gap-2">
-                  {[1, 2, 3, 4, 5].map((starNum) => {
-                    const isFilled = (hoverRating || rating) >= starNum;
+                {/* Interactive Star Buttons (1 to 10) */}
+                <div className="flex items-center gap-1.5 flex-wrap">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((starNum) => {
+                    const isFilled = (hoverRating || Number(rating) || 0) >= starNum;
                     return (
                       <button
                         key={starNum}
@@ -742,10 +763,10 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
                         onMouseLeave={() => setHoverRating(0)}
                         onClick={() => setRating(starNum)}
                         className="p-1 rounded-xl transition transform hover:scale-125 focus:outline-none cursor-pointer"
-                        title={`Rate ${starNum} Stars`}
+                        title={`Rate ${starNum} of 10`}
                       >
                         <Star
-                          className={`w-7 h-7 transition-colors ${
+                          className={`w-6 h-6 transition-colors ${
                             isFilled
                               ? "fill-amber-400 text-amber-500 drop-shadow-sm"
                               : "text-slate-300 hover:text-amber-300"
@@ -756,15 +777,34 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
                   })}
                 </div>
 
-                {/* Numeric Pill Selectors for Quick One-Tap Choice */}
-                <div className="flex items-center gap-1.5 pt-1">
-                  {[1, 2, 3, 4, 5].map((n) => (
+                {/* Slider Input (min=1, max=10) */}
+                <div className="pt-1">
+                  <input
+                    type="range"
+                    min="1"
+                    max="10"
+                    step="1"
+                    value={rating || 1}
+                    onChange={(e) => setRating(Number(e.target.value))}
+                    className="w-full h-2 bg-amber-200 rounded-lg appearance-none cursor-pointer accent-amber-500"
+                    title="Slide to select rating from 1 to 10"
+                  />
+                  <div className="flex justify-between text-[10px] text-amber-800/70 font-black px-0.5 mt-0.5">
+                    <span>1 (Lowest)</span>
+                    <span>5 (Average)</span>
+                    <span>10 (Highest)</span>
+                  </div>
+                </div>
+
+                {/* Numeric Pill Selectors for Quick One-Tap Choice (1 to 10) */}
+                <div className="grid grid-cols-5 sm:grid-cols-10 gap-1 pt-1">
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((n) => (
                     <button
                       key={n}
                       type="button"
                       onClick={() => setRating(n)}
-                      className={`flex-1 py-1 rounded-lg text-xs font-black transition cursor-pointer ${
-                        rating === n
+                      className={`py-1 rounded-lg text-xs font-black transition cursor-pointer text-center ${
+                        Number(rating) === n
                           ? "bg-amber-500 text-white shadow-sm"
                           : "bg-white text-slate-700 border border-amber-200 hover:bg-amber-100"
                       }`}
@@ -776,7 +816,7 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
 
                 {/* Rating Description Label */}
                 <p className="text-[11px] text-amber-900 font-bold">
-                  {RATING_DESCRIPTIONS[rating] || "Select a rating from 1 to 5"}
+                  {rating ? RATING_DESCRIPTIONS[rating] || `${rating}/10 Stars` : "Select a rating from 1 to 10"}
                 </p>
               </div>
 
@@ -877,9 +917,9 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
                 </button>
                 <button
                   type="submit"
-                  disabled={isSubmitting || !author.trim() || !comment.trim()}
+                  disabled={isSubmitting || !author.trim() || !comment.trim() || !rating}
                   className={`px-6 py-2.5 rounded-xl font-black text-white shadow-md flex items-center gap-2 transition cursor-pointer ${
-                    isSubmitting || !author.trim() || !comment.trim()
+                    isSubmitting || !author.trim() || !comment.trim() || !rating
                       ? "bg-slate-400 cursor-not-allowed"
                       : "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 shadow-emerald-600/30"
                   }`}
