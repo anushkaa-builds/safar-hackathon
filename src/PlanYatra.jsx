@@ -42,8 +42,8 @@ export default function PlanYatra({ onItineraryGenerated }) {
   const [age, setAge] = useState("");
   const [pickerOpen, setPickerOpen] = useState(false);
   const [gender, setGender] = useState("");
-  const [currentCity, setCurrentCity] = useState("Delhi");
-  const [destination, setDestination] = useState("Kashmir");
+  const [currentCity, setCurrentCity] = useState("");
+  const [destination, setDestination] = useState("");
 
   const [durationPreset, setDurationPreset] = useState(5);
   const [customDays, setCustomDays] = useState("5");
