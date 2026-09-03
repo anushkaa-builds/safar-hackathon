@@ -21,6 +21,9 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
   const [isTyping, setIsTyping] = useState(false);
   const [apiKeyModalOpen, setApiKeyModalOpen] = useState(false);
   const [backendHealth, setBackendHealth] = useState(null);
+  const [apiKeyInput, setApiKeyInput] = useState("");
+  const [isSavingKey, setIsSavingKey] = useState(false);
+  const [keyFeedback, setKeyFeedback] = useState(null);
   const messagesEndRef = useRef(null);
 
   const destName = activeItinerary?.destination?.name || "Kashmir";
@@ -57,6 +60,32 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
       }
     } catch (e) {
       setBackendHealth({ status: "offline" });
+    }
+  }
+
+  async function handleSaveKey() {
+    if (!apiKeyInput.trim()) return;
+    setIsSavingKey(true);
+    setKeyFeedback(null);
+    try {
+      const res = await fetch("/api/config/key", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ apiKey: apiKeyInput.trim() })
+      });
+      const data = await res.json();
+      if (data.verified) {
+        setKeyFeedback(`✅ Key verified! Hybrid AI mode (${data.model}) is now active.`);
+        setApiKeyInput("");
+        checkHealth();
+      } else {
+        setKeyFeedback(`❌ Verification failed: ${data.error || "Invalid key"}`);
+        checkHealth();
+      }
+    } catch (err) {
+      setKeyFeedback(`❌ Could not save key: ${err.message}`);
+    } finally {
+      setIsSavingKey(false);
     }
   }
 
@@ -247,6 +276,24 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
           </button>
         </div>
       </div>
+
+      {/* Informative Mode Banner */}
+      {backendHealth && !backendHealth.openai?.verified && (
+        <div className="px-5 py-3 rounded-2xl bg-amber-50 border-2 border-amber-200 text-amber-950 flex flex-wrap items-center justify-between gap-2 text-xs shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
+            <span className="font-bold">
+              Operating in <strong>Local Site Guardian Mode</strong> (53 verified site knowledge chunks).
+            </span>
+          </div>
+          <button
+            onClick={() => setApiKeyModalOpen(true)}
+            className="px-3 py-1.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-[11px] flex items-center gap-1 transition shadow-sm"
+          >
+            <Key className="w-3 h-3" /> Connect OpenAI Key
+          </button>
+        </div>
+      )}
 
       {/* Grid: Left = Live Proactive Guardian Feed, Right = Chatbot */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
@@ -443,6 +490,37 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
                   {backendHealth?.openai?.configured ? "Configured in .env" : "Optional (.env configured)"}
                 </span>
               </div>
+            </div>
+
+            {/* Key Configuration Input */}
+            <div className="p-4 rounded-2xl bg-white border-2 border-slate-200 space-y-2.5">
+              <label className="block text-xs font-black text-slate-800">
+                Connect OpenAI API Key:
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="password"
+                  value={apiKeyInput}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder="Enter OpenAI key (sk-proj-...)"
+                  className="flex-1 px-3.5 py-2.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-mono focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <button
+                  onClick={handleSaveKey}
+                  disabled={isSavingKey || !apiKeyInput.trim()}
+                  className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs transition disabled:opacity-50 disabled:cursor-not-allowed shrink-0"
+                >
+                  {isSavingKey ? "Verifying..." : "Save & Verify"}
+                </button>
+              </div>
+              {keyFeedback && (
+                <p className={`text-[11px] font-bold ${keyFeedback.includes("✅") ? "text-emerald-700" : "text-rose-600"}`}>
+                  {keyFeedback}
+                </p>
+              )}
+              <p className="text-[10px] text-slate-500 font-medium">
+                Saves securely to your local <code className="bg-slate-100 px-1 py-0.5 rounded">.env</code> file. Never hardcoded or exposed to the public.
+              </p>
             </div>
 
             {/* Explanatory notes */}

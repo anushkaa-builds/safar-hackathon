@@ -310,6 +310,37 @@ app.get("/api/health", async (req, res) => {
 });
 
 /**
+ * Update and Verify OpenAI API Key Endpoint
+ * POST /api/config/key
+ */
+app.post("/api/config/key", async (req, res) => {
+  const { apiKey } = req.body;
+  if (!apiKey || typeof apiKey !== "string") {
+    return res.status(400).json({ success: false, error: "Invalid API key format" });
+  }
+  const cleanKey = apiKey.trim().replace(/^["']|["']$/g, "");
+  process.env.OPENAI_API_KEY = cleanKey;
+
+  // Persist to .env in both root and server directory
+  try {
+    const envContent = `# Server Configuration\nPORT=${PORT}\n\n# OpenAI API Configuration\nOPENAI_API_KEY=${cleanKey}\n\n# OpenAI Model Configuration\nOPENAI_MODEL=${process.env.OPENAI_MODEL || "gpt-4o-mini"}\nEMBEDDING_MODEL=${process.env.EMBEDDING_MODEL || "text-embedding-3-small"}\n`;
+    if (fs.existsSync(rootEnvPath)) fs.writeFileSync(rootEnvPath, envContent, "utf-8");
+    if (fs.existsSync(serverEnvPath)) fs.writeFileSync(serverEnvPath, envContent, "utf-8");
+  } catch (e) {
+    console.warn("Could not persist to .env file:", e.message);
+  }
+
+  const status = await verifyOpenAIKey();
+  res.json({
+    success: status.verified,
+    status: status.status,
+    verified: status.verified,
+    error: status.error,
+    model: status.model
+  });
+});
+
+/**
  * Index Data Endpoint (can trigger indexing via API if needed)
  * POST /api/index
  */
