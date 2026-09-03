@@ -57,6 +57,29 @@ function getCleanApiKey() {
   return cleaned;
 }
 
+/**
+ * Helper to update key-value in .env file while preserving existing variables
+ */
+function updateEnvKey(filePath, key, value) {
+  try {
+    let content = "";
+    if (fs.existsSync(filePath)) {
+      content = fs.readFileSync(filePath, "utf-8");
+      const regex = new RegExp(`^${key}=.*$`, "m");
+      if (regex.test(content)) {
+        content = content.replace(regex, `${key}=${value}`);
+      } else {
+        content = content.trim() + (content ? "\n" : "") + `${key}=${value}\n`;
+      }
+    } else {
+      content = `# Server Configuration\nPORT=${PORT}\n\n${key}=${value}\nOPENAI_MODEL=gpt-4o-mini\nEMBEDDING_MODEL=text-embedding-3-small\n`;
+    }
+    fs.writeFileSync(filePath, content, "utf-8");
+  } catch (e) {
+    console.warn(`[Env] Could not persist to ${filePath}:`, e.message);
+  }
+}
+
 // Global OpenAI client and verification state
 let openaiClient = null;
 let openaiStatus = {
@@ -70,14 +93,14 @@ let openaiStatus = {
 /**
  * Performs a lightweight verification call to OpenAI to confirm credentials work.
  */
-async function verifyOpenAIKey() {
-  const apiKey = getCleanApiKey();
-  if (!apiKey) {
+async function verifyOpenAIKey(customKey) {
+  const apiKey = customKey !== undefined ? customKey.trim().replace(/^["']|["']$/g, "") : getCleanApiKey();
+  if (!apiKey || apiKey === "your_openai_api_key_here" || apiKey === "your_key_here" || apiKey === "sk-your-key-here") {
     openaiStatus = {
       configured: false,
       verified: false,
       status: "Missing / Not Configured",
-      error: "No valid API key found in .env (OPENAI_API_KEY is empty or placeholder)",
+      error: "No valid API key found (OPENAI_API_KEY is empty or placeholder)",
       model: process.env.OPENAI_MODEL || "gpt-4o-mini"
     };
     openaiClient = null;
@@ -85,11 +108,12 @@ async function verifyOpenAIKey() {
   }
 
   openaiStatus.configured = true;
-  openaiClient = new OpenAI({ apiKey });
+  const testClient = new OpenAI({ apiKey });
 
   try {
     // Lightweight API call to verify API key validity with OpenAI
-    await openaiClient.models.list();
+    await testClient.models.list();
+    openaiClient = testClient;
     openaiStatus.verified = true;
     openaiStatus.status = "Loaded and Verified";
     openaiStatus.error = null;
@@ -310,35 +334,44 @@ app.get("/api/health", async (req, res) => {
 });
 
 /**
- * Update and Verify OpenAI API Key Endpoint
- * POST /api/config/key
+ * Common Handler for Saving and Verifying OpenAI Key
  */
-app.post("/api/config/key", async (req, res) => {
-  const { apiKey } = req.body;
+async function handleSaveAndVerifyKey(req, res) {
+  const apiKey = req.body?.apiKey || req.body?.key || req.body?.openaiApiKey || req.body?.openai_api_key;
   if (!apiKey || typeof apiKey !== "string") {
-    return res.status(400).json({ success: false, error: "Invalid API key format" });
+    return res.status(400).json({ 
+      success: false, 
+      verified: false,
+      error: "Invalid API key format. Please provide a valid string." 
+    });
   }
+
   const cleanKey = apiKey.trim().replace(/^["']|["']$/g, "");
   process.env.OPENAI_API_KEY = cleanKey;
 
   // Persist to .env in both root and server directory
-  try {
-    const envContent = `# Server Configuration\nPORT=${PORT}\n\n# OpenAI API Configuration\nOPENAI_API_KEY=${cleanKey}\n\n# OpenAI Model Configuration\nOPENAI_MODEL=${process.env.OPENAI_MODEL || "gpt-4o-mini"}\nEMBEDDING_MODEL=${process.env.EMBEDDING_MODEL || "text-embedding-3-small"}\n`;
-    if (fs.existsSync(rootEnvPath)) fs.writeFileSync(rootEnvPath, envContent, "utf-8");
-    if (fs.existsSync(serverEnvPath)) fs.writeFileSync(serverEnvPath, envContent, "utf-8");
-  } catch (e) {
-    console.warn("Could not persist to .env file:", e.message);
-  }
+  updateEnvKey(rootEnvPath, "OPENAI_API_KEY", cleanKey);
+  updateEnvKey(serverEnvPath, "OPENAI_API_KEY", cleanKey);
 
-  const status = await verifyOpenAIKey();
-  res.json({
+  const status = await verifyOpenAIKey(cleanKey);
+
+  return res.status(status.verified ? 200 : 400).json({
     success: status.verified,
-    status: status.status,
     verified: status.verified,
+    message: status.verified ? "Key verified and saved successfully" : (status.error || "Verification failed"),
+    status: status.status,
     error: status.error,
     model: status.model
   });
-});
+}
+
+/**
+ * Route aliases for saving and verifying OpenAI key
+ */
+app.post("/api/config/key", handleSaveAndVerifyKey);
+app.post("/api/save-openai-key", handleSaveAndVerifyKey);
+app.post("/api/settings/openai-key", handleSaveAndVerifyKey);
+app.post("/api/openai-key", handleSaveAndVerifyKey);
 
 /**
  * Index Data Endpoint (can trigger indexing via API if needed)
@@ -502,6 +535,33 @@ app.post("/api/chat/stream", async (req, res) => {
     model: "site-data-fallback",
     status: "fallback"
   });
+});
+
+/**
+ * Catch-all 404 JSON handler for unmatched /api/* routes.
+ * Prevents HTML error pages from breaking client JSON parsers.
+ */
+app.all("/api/*", (req, res) => {
+  res.status(404).json({
+    success: false,
+    verified: false,
+    error: `API route not found: ${req.method} ${req.originalUrl}`
+  });
+});
+
+/**
+ * Centralized JSON Error Handler Middleware
+ */
+app.use((err, req, res, next) => {
+  console.error("❌ [Server Error]:", err);
+  if (req.originalUrl?.startsWith("/api") || req.path?.startsWith("/api")) {
+    return res.status(err.status || 500).json({
+      success: false,
+      verified: false,
+      error: err.message || "Internal server error"
+    });
+  }
+  next(err);
 });
 
 // Start Server and verify OpenAI key

@@ -52,7 +52,8 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
   async function checkHealth() {
     try {
       const res = await fetch("/api/health");
-      if (res.ok) {
+      const contentType = res.headers.get("content-type");
+      if (res.ok && contentType && contentType.includes("application/json")) {
         const data = await res.json();
         setBackendHealth(data);
       } else {
@@ -73,13 +74,22 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ apiKey: apiKeyInput.trim() })
       });
-      const data = await res.json();
-      if (data.verified) {
-        setKeyFeedback(`✅ Key verified! Hybrid AI mode (${data.model}) is now active.`);
+
+      const contentType = res.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await res.json();
+      } else {
+        const text = await res.text();
+        throw new Error(`Server returned non-JSON response (${res.status}): ${text.slice(0, 80)}`);
+      }
+
+      if (data.success || data.verified) {
+        setKeyFeedback(`✅ Key verified! Hybrid AI mode (${data.model || "gpt-4o-mini"}) is now active.`);
         setApiKeyInput("");
         checkHealth();
       } else {
-        setKeyFeedback(`❌ Verification failed: ${data.error || "Invalid key"}`);
+        setKeyFeedback(`❌ Verification failed: ${data.error || data.message || "Invalid key"}`);
         checkHealth();
       }
     } catch (err) {
