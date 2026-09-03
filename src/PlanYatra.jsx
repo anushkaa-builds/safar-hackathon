@@ -46,9 +46,9 @@ export default function PlanYatra({ onItineraryGenerated }) {
 
   const [durationPreset, setDurationPreset] = useState(5);
   const [customDays, setCustomDays] = useState("5");
-  const [budget, setBudget] = useState("");
+  const [budget, setBudget] = useState(25000);
 
-  const [selectedInterests, setSelectedInterests] = useState(["🌸 Lakes & Valleys", "🏔️ Mountain Snow"]);
+  const [selectedInterests, setSelectedInterests] = useState([" "]);
   const [customInterest, setCustomInterest] = useState("");
 
   const [departDate, setDepartDate] = useState("");

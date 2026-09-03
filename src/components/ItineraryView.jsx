@@ -1,16 +1,33 @@
 import React, { useState, useEffect } from "react";
 import { 
   Calendar, MapPin, Clock, DollarSign, Users, ShieldAlert, Sparkles, 
-  ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, ChevronRight, Check, ArrowRight
+  ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, 
+  ChevronRight, Check, ArrowRight, Search, CreditCard, Ticket, Star, Building
 } from "lucide-react";
 import { getTravelAndStayOptions } from "../services/itineraryGenerator";
+import { searchRealHotels, searchRealFlights } from "../services/realSearchService";
+import BookingModal from "./BookingModal";
 
-export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
+export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOpenMyBookings }) {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [activePlan, setActivePlan] = useState(itinerary);
   const [isFinalized, setIsFinalized] = useState(itinerary?.isFinalized ?? false);
   const [swapToast, setSwapToast] = useState("");
   const [transitTab, setTransitTab] = useState("flight");
+
+  // Live Search States
+  const [staySearchTab, setStaySearchTab] = useState("ai");
+  const [hotelSearchQuery, setHotelSearchQuery] = useState("");
+  const [liveHotels, setLiveHotels] = useState([]);
+  const [liveFlights, setLiveFlights] = useState([]);
+  const [isSearchingHotels, setIsSearchingHotels] = useState(false);
+
+  // Booking Modal State
+  const [bookingModalState, setBookingModalState] = useState({
+    isOpen: false,
+    item: null,
+    type: "hotel"
+  });
 
   useEffect(() => {
     if (itinerary) {
@@ -18,6 +35,13 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
       setIsFinalized(itinerary.isFinalized ?? false);
     }
   }, [itinerary]);
+
+  useEffect(() => {
+    if (activePlan?.destination?.name) {
+      searchRealHotels({ destination: activePlan.destination.name }).then(res => setLiveHotels(res));
+      searchRealFlights({ origin: activePlan.city || "Delhi", destination: activePlan.destination.name }).then(res => setLiveFlights(res));
+    }
+  }, [activePlan?.destination?.name]);
 
   if (!activePlan || !activePlan.days || activePlan.days.length === 0) {
     return (
@@ -42,30 +66,35 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
   const currentDay = activePlan.days[selectedDayIndex] || activePlan.days[0];
   const dest = activePlan.destination;
 
-  // Fallbacks for options if not directly attached
   const travelOptions = activePlan.availableTravelOptions || getTravelAndStayOptions(dest.name, activePlan.city || "Delhi");
   const currentSelectedTravel = activePlan.selectedTravel || travelOptions.flights[0] || travelOptions.trains[0];
   const currentSelectedStay = activePlan.selectedStay || activePlan.stayRecommendation || travelOptions.stays[0];
 
-  // Switch travel option directly
+  async function handleSearchHotelsSubmit(e) {
+    if (e) e.preventDefault();
+    setIsSearchingHotels(true);
+    const results = await searchRealHotels({ query: hotelSearchQuery, destination: dest.name });
+    setLiveHotels(results);
+    setIsSearchingHotels(false);
+  }
+
   function handleSelectTravel(opt) {
     const updated = { ...activePlan };
     updated.selectedTravel = opt;
     if (updated.days && updated.days.length > 0) {
       const day1 = updated.days[0];
       if (day1.activities && day1.activities.length > 0) {
-        day1.activities[0].slot = `Morning (${opt.departureTime} - 12:30 PM)`;
+        day1.activities[0].slot = `Morning (${opt.departureTime || '08:00 AM'} - 12:30 PM)`;
         day1.activities[0].title = `Departure from ${updated.city || "Origin"} via ${opt.provider || opt.mode} & Check-in at ${currentSelectedStay.name}`;
         day1.activities[0].estCost = `${opt.price} (Included)`;
-        day1.activities[0].description = `Depart at ${opt.departureTime} (${opt.route}). Arrive, transfer to ${currentSelectedStay.name}, settle in, and acclimatize with local refreshments.`;
+        day1.activities[0].description = `Depart at ${opt.departureTime || '08:00 AM'} (${opt.route}). Arrive, transfer to ${currentSelectedStay.name}, settle in, and acclimatize with local refreshments.`;
       }
     }
     setActivePlan(updated);
-    setSwapToast(`✅ Travel updated to: ${opt.provider || opt.mode} (${opt.timing}, ${opt.price})`);
+    setSwapToast(`✅ Travel updated to: ${opt.provider || opt.mode} (${opt.timing || opt.departureTime}, ${opt.price})`);
     setTimeout(() => setSwapToast(""), 3500);
   }
 
-  // Switch stay option directly
   function handleSelectStay(stayOpt) {
     const updated = { ...activePlan };
     updated.selectedStay = stayOpt;
@@ -74,7 +103,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
       const day1 = updated.days[0];
       if (day1.activities && day1.activities.length > 0) {
         day1.activities[0].title = `Departure from ${updated.city || "Origin"} via ${currentSelectedTravel.provider || currentSelectedTravel.mode} & Check-in at ${stayOpt.name}`;
-        day1.activities[0].description = `Depart at ${currentSelectedTravel.departureTime} (${currentSelectedTravel.route}). Arrive, transfer to ${stayOpt.name}, settle in, and acclimatize with local refreshments.`;
+        day1.activities[0].description = `Depart at ${currentSelectedTravel.departureTime || '08:00 AM'} (${currentSelectedTravel.route}). Arrive, transfer to ${stayOpt.name}, settle in, and acclimatize with local refreshments.`;
       }
     }
     setActivePlan(updated);
@@ -82,7 +111,6 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
     setTimeout(() => setSwapToast(""), 3500);
   }
 
-  // Finalize itinerary generation
   function handleFinalizeItinerary() {
     const updated = { ...activePlan };
     updated.isFinalized = true;
@@ -91,10 +119,10 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
     if (updated.days && updated.days.length > 0) {
       const day1 = updated.days[0];
       if (day1.activities && day1.activities.length > 0) {
-        day1.activities[0].slot = `Morning (${currentSelectedTravel.departureTime} - 12:30 PM)`;
+        day1.activities[0].slot = `Morning (${currentSelectedTravel.departureTime || '08:00 AM'} - 12:30 PM)`;
         day1.activities[0].title = `Departure from ${updated.city || "Origin"} via ${currentSelectedTravel.provider || currentSelectedTravel.mode} & Check-in at ${currentSelectedStay.name}`;
         day1.activities[0].estCost = `${currentSelectedTravel.price} (Included)`;
-        day1.activities[0].description = `Depart at ${currentSelectedTravel.departureTime} (${currentSelectedTravel.route}). Arrive, transfer to ${currentSelectedStay.name}, settle in, and acclimatize with local refreshments.`;
+        day1.activities[0].description = `Depart at ${currentSelectedTravel.departureTime || '08:00 AM'} (${currentSelectedTravel.route}). Arrive, transfer to ${currentSelectedStay.name}, settle in, and acclimatize with local refreshments.`;
       }
     }
     setActivePlan(updated);
@@ -104,7 +132,24 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
-  // Swap overcrowded activity with offbeat serene alternative
+  function handleOpenBookingModal(itemToBook, type) {
+    setBookingModalState({
+      isOpen: true,
+      item: itemToBook,
+      type: type
+    });
+  }
+
+  function handleBookingSuccess(confirmedRecord) {
+    if (confirmedRecord.type === "hotel") {
+      handleSelectStay(confirmedRecord.itemDetails || confirmedRecord);
+    } else {
+      handleSelectTravel(confirmedRecord.itemDetails || confirmedRecord);
+    }
+    setSwapToast(`✅ Real Booking Confirmed! PNR: ${confirmedRecord.pnr} saved to Supabase.`);
+    setTimeout(() => setSwapToast(""), 6000);
+  }
+
   function handleSwap(dayIndex, activityId) {
     const updatedDays = [...activePlan.days];
     const activity = updatedDays[dayIndex].activities.find(a => a.id === activityId);
@@ -127,7 +172,6 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
     window.print();
   }
 
-  // Renders the Travel and Stay selection cards
   const renderTravelAndStaySelection = (isAtTop = false) => (
     <div className={`rounded-3xl border-2 p-6 sm:p-8 space-y-6 shadow-xl ${
       isAtTop 
@@ -139,16 +183,14 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
           <div className="flex items-center gap-2">
             <span className="text-xl">✈️🏨</span>
             <span className="text-xs font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
-              {isAtTop ? "Step 2: Choose Travel & Stay Preferences" : "Modify / Switch Travel & Accommodation"}
+              {isAtTop ? "Step 2: Choose Travel & Stay Preferences" : "Real Booking & Multimodal Switcher"}
             </span>
           </div>
           <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-            {isAtTop ? `Select Your Travel & Stay for ${dest.name}` : "Travel & Accommodation Options"}
+            {isAtTop ? `Select Your Travel & Stay for ${dest.name}` : "Live Booking & Options Directory"}
           </h2>
           <p className="text-xs text-slate-600 font-semibold mt-0.5">
-            {isAtTop 
-              ? "Pick your preferred flight/train and hotel below to generate your final optimized daily schedule."
-              : "Review or switch your selected flight, train, or hotel anytime. Changes will update your schedule in real time."}
+            Choose from curated AI recommendations or search live verified real hotels & flights with instant Stripe checkout & PNR voucher.
           </p>
         </div>
 
@@ -166,17 +208,17 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Multimodal Transit Selection */}
+        {/* LEFT COLUMN: Travel & Transit Selection */}
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm">
                 ✈️
               </div>
-              <h3 className="font-black text-slate-900 text-base">Travel & Transit Selection</h3>
+              <h3 className="font-black text-slate-900 text-base">Travel & Transit</h3>
             </div>
 
-            {/* Sub-tab switcher */}
+            {/* Travel Mode Sub-tabs */}
             <div className="flex gap-1 bg-slate-100 p-1 rounded-xl text-xs font-black">
               <button
                 type="button"
@@ -214,40 +256,20 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
               return (
                 <div 
                   key={opt.id} 
-                  onClick={() => handleSelectTravel(opt)}
-                  className={`p-4 rounded-2xl border-2 transition cursor-pointer space-y-2.5 ${
+                  className={`p-4 rounded-2xl border-2 transition space-y-2.5 ${
                     isSelected 
                       ? "bg-blue-50/80 border-emerald-500 shadow-md ring-2 ring-emerald-400/40" 
                       : "bg-white border-slate-200 hover:border-blue-300"
                   }`}
                 >
-                  <div className="flex items-center justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div>
                       <span className="font-black text-sm text-slate-900 block">{opt.provider || opt.mode}</span>
-                      <span className="text-xs text-slate-600 font-semibold">{opt.timing} • {opt.duration}</span>
+                      <span className="text-xs text-slate-600 font-semibold">{opt.timing || opt.departureTime} • {opt.duration}</span>
                     </div>
                     <div className="text-right">
                       <span className="font-black text-sm text-emerald-800 block">{opt.price}</span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectTravel(opt);
-                        }}
-                        className={`mt-1.5 px-3.5 py-1.5 rounded-xl text-xs font-black transition ${
-                          isSelected
-                            ? "bg-emerald-600 text-white shadow-xs"
-                            : "bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300"
-                        }`}
-                      >
-                        {isSelected ? (
-                          <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3" /> Selected
-                          </span>
-                        ) : (
-                          "Select"
-                        )}
-                      </button>
+                      <span className="text-[10px] text-slate-500 font-bold">per traveler</span>
                     </div>
                   </div>
 
@@ -261,96 +283,151 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
                       </span>
                     ))}
                   </div>
+
+                  <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTravel(opt)}
+                      className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-black transition ${
+                        isSelected
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
+                      }`}
+                    >
+                      {isSelected ? "✓ Plan Selected" : "Select for Plan"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenBookingModal(opt, "flight")}
+                      className="py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1 shadow-xs transition"
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Book Real Ticket</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}
           </div>
         </div>
 
-        {/* Accommodation Selection */}
+        {/* RIGHT COLUMN: Accommodation & Real Hotel Search */}
         <div className="space-y-4">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-sm">
-              🏨
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-amber-600 text-white flex items-center justify-center font-black text-sm">
+                🏨
+              </div>
+              <h3 className="font-black text-slate-900 text-base">Accommodation & Stays</h3>
             </div>
-            <h3 className="font-black text-slate-900 text-base">Accommodation & Stay Selection</h3>
+
+            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl text-xs font-black">
+              <button
+                type="button"
+                onClick={() => setStaySearchTab("ai")}
+                className={`px-3 py-1.5 rounded-lg transition ${
+                  staySearchTab === "ai" ? "bg-amber-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                AI Curated ({travelOptions.stays.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setStaySearchTab("live")}
+                className={`px-3 py-1.5 rounded-lg transition flex items-center gap-1 ${
+                  staySearchTab === "live" ? "bg-amber-600 text-white shadow-xs" : "text-slate-600 hover:text-slate-900"
+                }`}
+              >
+                <Search className="w-3 h-3" />
+                <span>Live Search ({liveHotels.length})</span>
+              </button>
+            </div>
           </div>
 
+          {staySearchTab === "live" && (
+            <form onSubmit={handleSearchHotelsSubmit} className="flex gap-2">
+              <div className="relative flex-1">
+                <input
+                  type="text"
+                  value={hotelSearchQuery}
+                  onChange={(e) => setHotelSearchQuery(e.target.value)}
+                  placeholder={`Search hotels in ${dest.name} (e.g. Taj, Radisson, Resort)...`}
+                  className="w-full bg-slate-50 border border-slate-300 focus:border-amber-500 rounded-xl px-3.5 py-2 text-xs font-semibold pl-8 outline-none"
+                />
+                <Search className="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-2.5" />
+              </div>
+              <button
+                type="submit"
+                disabled={isSearchingHotels}
+                className="px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-700 text-white font-black text-xs transition shrink-0"
+              >
+                {isSearchingHotels ? "Searching..." : "Search"}
+              </button>
+            </form>
+          )}
+
           <div className="space-y-3">
-            {travelOptions.stays.map((stay) => {
+            {(staySearchTab === "ai" ? travelOptions.stays : liveHotels).map((stay) => {
               const isSelected = currentSelectedStay?.id === stay.id;
               return (
                 <div 
                   key={stay.id} 
-                  onClick={() => handleSelectStay(stay)}
-                  className={`p-4 rounded-2xl border-2 transition cursor-pointer space-y-2.5 ${
+                  className={`p-4 rounded-2xl border-2 transition space-y-2.5 ${
                     isSelected 
                       ? "bg-amber-50/80 border-emerald-500 shadow-md ring-2 ring-emerald-400/40" 
                       : "bg-white border-slate-200 hover:border-amber-300"
                   }`}
                 >
                   <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200 px-2 py-0.5 rounded">
+                    {stay.image && (
+                      <img 
+                        src={stay.image} 
+                        alt={stay.name} 
+                        className="w-16 h-16 rounded-xl object-cover border border-slate-200 shrink-0"
+                      />
+                    )}
+                    <div className="flex-1">
+                      <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200 px-1.5 py-0.5 rounded">
                         {stay.type}
                       </span>
-                      <h4 className="font-black text-sm text-slate-900 mt-1">{stay.name}</h4>
+                      <h4 className="font-black text-sm text-slate-900 mt-1 leading-snug">{stay.name}</h4>
                       <p className="text-xs text-emerald-800 font-bold mt-0.5">{stay.price}</p>
                     </div>
                     <div className="text-right shrink-0">
-                      <span className="text-xs font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 block mb-1.5">
+                      <span className="text-xs font-black text-amber-900 bg-amber-50 px-2 py-0.5 rounded-lg border border-amber-200 block mb-1">
                         ⭐ {stay.rating}
                       </span>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleSelectStay(stay);
-                        }}
-                        className={`px-3.5 py-1.5 rounded-xl text-xs font-black transition ${
-                          isSelected
-                            ? "bg-emerald-600 text-white shadow-xs"
-                            : "bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300"
-                        }`}
-                      >
-                        {isSelected ? (
-                          <span className="flex items-center gap-1">
-                            <Check className="w-3 h-3" /> Selected
-                          </span>
-                        ) : (
-                          "Select"
-                        )}
-                      </button>
                     </div>
                   </div>
 
-                  <p className="text-[11px] text-slate-600 font-medium line-clamp-1">{stay.description}</p>
+                  <p className="text-[11px] text-slate-600 font-medium line-clamp-2">{stay.description || stay.address}</p>
+
+                  <div className="pt-2 flex items-center justify-between gap-2 border-t border-slate-100">
+                    <button
+                      type="button"
+                      onClick={() => handleSelectStay(stay)}
+                      className={`flex-1 py-1.5 px-3 rounded-xl text-xs font-black transition ${
+                        isSelected
+                          ? "bg-emerald-600 text-white shadow-xs"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-200"
+                      }`}
+                    >
+                      {isSelected ? "✓ Stay Selected" : "Select for Plan"}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleOpenBookingModal(stay, "hotel")}
+                      className="py-1.5 px-3 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-black text-xs flex items-center justify-center gap-1 shadow-xs transition"
+                    >
+                      <CreditCard className="w-3.5 h-3.5 text-emerald-400" />
+                      <span>Book Real Room</span>
+                    </button>
+                  </div>
                 </div>
               );
             })}
-          </div>
-
-          {/* Budget Breakdown Summary */}
-          <div className="pt-2 p-3 bg-slate-50 border border-slate-200 rounded-2xl">
-            <h4 className="font-black text-[11px] text-slate-900 mb-1.5">Trip Budget Allocation:</h4>
-            <div className="grid grid-cols-4 gap-1.5 text-center text-[9px] font-bold">
-              <div className="p-1.5 rounded-lg bg-teal-100 text-teal-900">
-                <span>Stays (40%)</span>
-                <p className="font-black text-[10px]">₹{activePlan.budgetBreakdown?.stay?.toLocaleString() || "10,000"}</p>
-              </div>
-              <div className="p-1.5 rounded-lg bg-blue-100 text-blue-900">
-                <span>Transit (25%)</span>
-                <p className="font-black text-[10px]">₹{activePlan.budgetBreakdown?.transit?.toLocaleString() || "6,250"}</p>
-              </div>
-              <div className="p-1.5 rounded-lg bg-amber-100 text-amber-900">
-                <span>Visits (25%)</span>
-                <p className="font-black text-[10px]">₹{activePlan.budgetBreakdown?.activities?.toLocaleString() || "6,250"}</p>
-              </div>
-              <div className="p-1.5 rounded-lg bg-slate-200 text-slate-800">
-                <span>Buffer (10%)</span>
-                <p className="font-black text-[10px]">₹{activePlan.budgetBreakdown?.buffer?.toLocaleString() || "2,500"}</p>
-              </div>
-            </div>
           </div>
         </div>
       </div>
@@ -373,7 +450,6 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
 
   return (
     <div className="max-w-6xl mx-auto p-4 sm:p-8 space-y-8">
-      {/* 🚀 1. IF NOT FINALIZED: SHOW TRAVEL & STAY SELECTION AT THE VERY TOP */}
       {!isFinalized && renderTravelAndStaySelection(true)}
 
       {/* Header Banner */}
@@ -451,22 +527,28 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
                 <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedTravel.provider || currentSelectedTravel.mode}</h4>
               </div>
             </div>
-            <span className="font-black text-sm text-emerald-800 bg-white border border-blue-200 px-2.5 py-1 rounded-xl shadow-sm">
-              {currentSelectedTravel.price}
-            </span>
+            <div className="text-right">
+              <span className="font-black text-sm text-emerald-800 bg-white border border-blue-200 px-2.5 py-1 rounded-xl shadow-sm block">
+                {currentSelectedTravel.price}
+              </span>
+            </div>
           </div>
           <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
             <p className="text-slate-900 font-bold">Route: {currentSelectedTravel.route}</p>
-            <p className="text-slate-600">Schedule: {currentSelectedTravel.timing} • {currentSelectedTravel.duration}</p>
+            <p className="text-slate-600">Schedule: {currentSelectedTravel.timing || currentSelectedTravel.departureTime} • {currentSelectedTravel.duration}</p>
             <p className="text-slate-500 text-[11px]">{currentSelectedTravel.cabinClass || currentSelectedTravel.stops}</p>
           </div>
           <div className="pt-2 flex items-center justify-between">
             <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Integrated in Day 1 Departure
             </span>
-            <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">
-              {currentSelectedTravel.carbonScore || "Eco-Friendly"}
-            </span>
+            <button
+              type="button"
+              onClick={() => handleOpenBookingModal(currentSelectedTravel, "flight")}
+              className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] flex items-center gap-1 shadow-xs transition"
+            >
+              <CreditCard className="w-3 h-3 text-emerald-400" /> Book Real Ticket
+            </button>
           </div>
         </div>
 
@@ -488,16 +570,20 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
           </div>
           <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
             <p className="text-emerald-800 font-bold">Price: {currentSelectedStay.price}</p>
-            <p className="text-slate-600 text-[11px] line-clamp-1">{currentSelectedStay.description}</p>
+            <p className="text-slate-600 text-[11px] line-clamp-1">{currentSelectedStay.description || currentSelectedStay.address}</p>
             <p className="text-slate-500 text-[10px]">Tier: {currentSelectedStay.type}</p>
           </div>
           <div className="pt-2 flex items-center justify-between">
             <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1">
               <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Integrated in Day 1 Check-in
             </span>
-            <span className="text-[10px] font-bold text-amber-800 bg-amber-100 px-2 py-0.5 rounded-full">
-              Confirmed Stay
-            </span>
+            <button
+              type="button"
+              onClick={() => handleOpenBookingModal(currentSelectedStay, "hotel")}
+              className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] flex items-center gap-1 shadow-xs transition"
+            >
+              <CreditCard className="w-3 h-3 text-emerald-400" /> Book Real Room
+            </button>
           </div>
         </div>
       </div>
@@ -510,7 +596,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
         </div>
       )}
 
-      {/* Health & Medical Advisory Notice (if user entered any) */}
+      {/* Health & Medical Advisory Notice */}
       {activePlan.medicalIssues && activePlan.medicalIssues.length > 0 && !activePlan.medicalIssues.includes("None (Fit to travel)") && (
         <div className="p-5 rounded-3xl bg-rose-50 border-2 border-rose-300 shadow-sm flex items-start gap-3.5">
           <div className="w-10 h-10 rounded-2xl bg-rose-600 text-white flex items-center justify-center font-black shrink-0">
@@ -610,7 +696,6 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
                     )}
                   </div>
 
-                  {/* Crowd Meter Badge */}
                   <div className="flex items-center gap-2 text-xs font-black">
                     <span className="text-slate-500">Live Crowd:</span>
                     <span className={`px-2.5 py-1 rounded-lg ${
@@ -628,14 +713,12 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
                   </p>
                 </div>
 
-                {/* Estimated Cost & Tags */}
                 <div className="mt-4 pt-3 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-3 text-xs">
                   <div className="flex items-center gap-2 font-bold text-slate-700">
                     <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
                     <span>Est. Fee: {act.estCost}</span>
                   </div>
 
-                  {/* Sustainable 1-Click Reroute Button */}
                   {act.offbeatAlternative && !act.isSwapped && (
                     <button
                       onClick={() => handleSwap(selectedDayIndex, act.id)}
@@ -654,6 +737,16 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
 
       {/* 🚀 2. AFTER GENERATION / WHEN FINALIZED: MOVE TRAVEL & STAY SELECTION TO THE BOTTOM */}
       {isFinalized && renderTravelAndStaySelection(false)}
+
+      {/* Real Booking & Payment Modal */}
+      <BookingModal
+        isOpen={bookingModalState.isOpen}
+        onClose={() => setBookingModalState({ isOpen: false, item: null, type: "hotel" })}
+        item={bookingModalState.item}
+        type={bookingModalState.type}
+        destination={dest.name}
+        onBookingComplete={handleBookingSuccess}
+      />
     </div>
   );
 }

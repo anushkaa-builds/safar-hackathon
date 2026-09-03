@@ -5,10 +5,11 @@ import AIAssistant from "./components/AIAssistant";
 import ReviewsView from "./components/ReviewsView";
 import AlertToast from "./components/AlertToast";
 import EmergencyModal from "./components/EmergencyModal";
+import MyBookingsModal from "./components/MyBookingsModal";
 import monitorService from "./services/monitoringService";
 import { generateSmartItinerary } from "./services/itineraryGenerator";
 import { getPreferences } from "./services/preferences";
-import { ShieldAlert, Compass, Calendar, Bot, Star } from "lucide-react";
+import { ShieldAlert, Compass, Calendar, Bot, Star, Ticket, LogOut, User } from "lucide-react";
 
 const tabs = [
   { id: "planner", label: "🎯 Plan Yatra", icon: Compass },
@@ -17,22 +18,23 @@ const tabs = [
   { id: "reviews", label: "⭐ Reviews & Tips", icon: Star },
 ];
 
-export default function Dashboard() {
+export default function Dashboard({ user, onLogout }) {
   const [activeTab, setActiveTab] = useState("planner");
   const [currentItinerary, setCurrentItinerary] = useState(null);
   const [activeAlerts, setActiveAlerts] = useState([]);
   const [unreadAlertsCount, setUnreadAlertsCount] = useState(0);
   const [sosOpen, setSosOpen] = useState(false);
+  const [bookingsModalOpen, setBookingsModalOpen] = useState(false);
   const [toastAlert, setToastAlert] = useState(null);
 
   useEffect(() => {
-    const userId = localStorage.getItem("safar_user_id") || "demo_user";
+    const userId = user?.id || localStorage.getItem("safar_user_id") || "demo_user";
     getPreferences(userId).then((prefs) => {
       if (prefs) {
         const plan = generateSmartItinerary(prefs);
         setCurrentItinerary(plan);
       } else {
-        const defaultPlan = generateSmartItinerary({ destination: "Kashmir", holidays: 5, budget: 450 });
+        const defaultPlan = generateSmartItinerary({ destination: "Kashmir", holidays: 5, budget: 35000 });
         setCurrentItinerary(defaultPlan);
       }
     });
@@ -43,7 +45,6 @@ export default function Dashboard() {
       if (newSevere) {
         setToastAlert(newSevere);
       }
-      // Show number of active/new alert messages
       const count = alerts.filter(a => a.isNew).length || (alerts.length > 0 ? 1 : 0);
       setUnreadAlertsCount(prev => (prev === 0 ? count : prev));
     });
@@ -51,7 +52,7 @@ export default function Dashboard() {
     return () => {
       unsubscribe();
     };
-  }, []);
+  }, [user]);
 
   function handleTabChange(tabId) {
     setActiveTab(tabId);
@@ -91,20 +92,46 @@ export default function Dashboard() {
     setUnreadAlertsCount(0);
   }
 
+  const userEmail = user?.email || "Guest Yatri";
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-teal-50/20 to-amber-50/30">
-      {/* Top Navbar: Centered Heading with Tabs located right below */}
+      {/* Top Navbar */}
       <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm">
         <div className="max-w-6xl mx-auto px-4 sm:px-8 py-3 flex flex-col items-center justify-center relative">
-          {/* Top SOS button in absolute top-right position */}
-          <div className="absolute right-4 sm:right-8 top-3">
+          
+          {/* Top Left User & Bookings Access */}
+          <div className="absolute left-4 sm:left-8 top-3 flex items-center gap-2">
+            <button
+              onClick={() => setBookingsModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 text-slate-800 hover:text-emerald-800 font-black text-xs flex items-center gap-1.5 border border-slate-200 shadow-xs transition"
+              title="View your confirmed bookings and PNR vouchers"
+            >
+              <Ticket className="w-3.5 h-3.5 text-emerald-600" />
+              <span className="hidden md:inline">My Bookings</span>
+            </button>
+          </div>
+
+          {/* Top Right SOS & Logout */}
+          <div className="absolute right-4 sm:right-8 top-3 flex items-center gap-2">
             <button
               onClick={() => setSosOpen(true)}
-              className="px-3.5 py-2 rounded-2xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 transition shrink-0"
+              className="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-rose-600/30 transition shrink-0"
             >
-              <ShieldAlert className="w-4 h-4" />
+              <ShieldAlert className="w-3.5 h-3.5" />
               <span className="hidden sm:inline">SOS Safety</span>
             </button>
+
+            {onLogout && (
+              <button
+                onClick={onLogout}
+                className="p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 hover:text-rose-600 text-xs font-bold transition flex items-center gap-1"
+                title="Sign out"
+              >
+                <LogOut className="w-3.5 h-3.5" />
+                <span className="hidden lg:inline text-[11px]">Logout</span>
+              </button>
+            )}
           </div>
 
           {/* 1. Main Heading in the Topmost Center */}
@@ -117,7 +144,7 @@ export default function Dashboard() {
             </div>
             <div className="text-center">
               <span className="font-black text-2xl text-slate-900 tracking-tight block leading-none">YatriSathi</span>
-              <span className="text-[10px] font-bold text-emerald-700 tracking-wide block mt-0.5">AI-Powered Tourism Optimization Platform</span>
+              <span className="text-[10px] font-bold text-emerald-700 tracking-wide block mt-0.5">AI Tourism & Real Booking Platform</span>
             </div>
           </div>
 
@@ -160,6 +187,7 @@ export default function Dashboard() {
             itinerary={currentItinerary}
             onRegenerate={() => handleTabChange("planner")}
             onOpenSOS={() => setSosOpen(true)}
+            onOpenMyBookings={() => setBookingsModalOpen(true)}
           />
         )}
         {activeTab === "assistant" && (
@@ -189,6 +217,12 @@ export default function Dashboard() {
         isOpen={sosOpen}
         onClose={() => setSosOpen(false)}
         destinationName={currentItinerary?.destination?.name || "Kashmir"}
+      />
+
+      {/* My Bookings Modal */}
+      <MyBookingsModal
+        isOpen={bookingsModalOpen}
+        onClose={() => setBookingsModalOpen(false)}
       />
     </div>
   );
