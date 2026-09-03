@@ -5,17 +5,25 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "server": "node server/server.js",
+    "index-data": "node server/indexer.js",
+    "dev:all": "concurrently \"npm run dev\" \"npm run server\"",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
   "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
     "firebase": "^12.18.0",
     "lucide-react": "^1.38.0",
+    "openai": "^4.86.1",
     "react": "^19.2.8",
     "react-dom": "^19.2.8"
   },
   "devDependencies": {
+    "concurrently": "^9.1.2",
     "@eslint/js": "^10.0.1",
     "@tailwindcss/postcss": "^4.3.3",
     "@types/react": "^19.2.18",
