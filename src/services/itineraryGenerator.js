@@ -246,6 +246,208 @@ export function getTravelAndStayOptions(destInput, originCity = "Delhi") {
   return { flights, trains, buses, stays };
 }
 
+// ---------------------------------------------------------------------------
+// Return Transit Options (reversed route: destination → origin)
+// Same data shape as getTravelAndStayOptions but with "ret-" prefixed IDs and
+// adjusted timings / slightly varied prices so the return cards feel distinct.
+// ---------------------------------------------------------------------------
+export function getReturnTransitOptions(destInput, originCity = "Delhi") {
+  let matchedDest = null;
+  if (typeof destInput === "string") {
+    const rawDest = (destInput || "Kashmir").trim();
+    matchedDest = destinationsData.find(
+      d => d.name.toLowerCase().includes(rawDest.toLowerCase()) || rawDest.toLowerCase().includes(d.name.toLowerCase())
+    );
+    if (!matchedDest) {
+      matchedDest = { name: rawDest, transport: {} };
+    }
+  } else {
+    matchedDest = destInput;
+  }
+
+  const origin = originCity || "Delhi";
+  const destName = matchedDest.name;
+  const nearestRail = matchedDest.transport?.nearestRailway || `${destName} Junction`;
+
+  // Return Flights (destination → origin)
+  const flights = [
+    {
+      id: "ret-flight-1",
+      type: "flight",
+      provider: "IndiGo (6E-2042)",
+      airline: "IndiGo",
+      flightNumber: "6E-2042",
+      mode: `✈️ Flight • IndiGo (6E-2042)`,
+      icon: "Plane",
+      route: `${destName} ➔ ${origin}`,
+      departureTime: "07:30 AM",
+      arrivalTime: "10:05 AM",
+      timing: "07:30 AM - 10:05 AM",
+      duration: "2h 35m",
+      stops: "Non-stop",
+      price: "₹4,850",
+      priceNum: 4850,
+      cabinClass: "Economy (Saver)",
+      baggage: "7kg Cabin + 15kg Check-in",
+      tags: ["Fastest Return", "Non-stop", "Morning"],
+      carbonScore: "Moderate"
+    },
+    {
+      id: "ret-flight-2",
+      type: "flight",
+      provider: "Air India (AI-826)",
+      airline: "Air India",
+      flightNumber: "AI-826",
+      mode: `✈️ Flight • Air India (AI-826)`,
+      icon: "Plane",
+      route: `${destName} ➔ ${origin}`,
+      departureTime: "01:15 PM",
+      arrivalTime: "03:55 PM",
+      timing: "01:15 PM - 03:55 PM",
+      duration: "2h 40m",
+      stops: "Non-stop",
+      price: "₹5,650",
+      priceNum: 5650,
+      cabinClass: "Economy (Full Service)",
+      baggage: "Hot Meals + 25kg Baggage Included",
+      tags: ["Full Service", "Afternoon Return", "Free Meals"],
+      carbonScore: "Moderate"
+    },
+    {
+      id: "ret-flight-3",
+      type: "flight",
+      provider: "SpiceJet (SG-105)",
+      airline: "SpiceJet",
+      flightNumber: "SG-105",
+      mode: `✈️ Flight • SpiceJet (SG-105)`,
+      icon: "Plane",
+      route: `${destName} ➔ ${origin}`,
+      departureTime: "04:45 PM",
+      arrivalTime: "07:20 PM",
+      timing: "04:45 PM - 07:20 PM",
+      duration: "2h 35m",
+      stops: "Non-stop",
+      price: "₹3,750",
+      priceNum: 3750,
+      cabinClass: "Economy (Value Fare)",
+      baggage: "7kg Cabin Baggage",
+      tags: ["Best Value", "Evening Return", "Budget Friendly"],
+      carbonScore: "Moderate"
+    }
+  ];
+
+  // Return Trains (destination → origin)
+  const trains = [
+    {
+      id: "ret-train-1",
+      type: "train",
+      provider: "Vande Bharat Express (22440)",
+      trainName: "Vande Bharat Express",
+      trainNumber: "22440",
+      mode: "🚆 Train • Vande Bharat Express (22440)",
+      icon: "Train",
+      route: `${nearestRail} ➔ ${origin}`,
+      departureTime: "05:45 AM",
+      arrivalTime: "01:45 PM",
+      timing: "05:45 AM - 01:45 PM",
+      duration: "8h 00m",
+      stops: "Superfast Express (4 Stops)",
+      price: "₹1,620",
+      priceNum: 1620,
+      cabinClass: "AC Chair Car (CC)",
+      baggage: "Complimentary Hot Breakfast & Lunch",
+      tags: ["High Speed", "Scenic Route", "Recommended"],
+      carbonScore: "Low (Eco-Friendly)"
+    },
+    {
+      id: "ret-train-2",
+      type: "train",
+      provider: "Rajdhani Express (12426)",
+      trainName: "Rajdhani Superfast Express",
+      trainNumber: "12426",
+      mode: "🚆 Train • Rajdhani Express (12426)",
+      icon: "Train",
+      route: `${nearestRail} ➔ ${origin}`,
+      departureTime: "07:00 PM",
+      arrivalTime: "04:30 AM",
+      timing: "07:00 PM - 04:30 AM",
+      duration: "9h 30m",
+      stops: "Overnight Express",
+      price: "₹2,080",
+      priceNum: 2080,
+      cabinClass: "3-Tier AC (3AC Sleeper)",
+      baggage: "Bedroll & Dinner Included",
+      tags: ["Overnight Sleep", "Comfortable", "Top Rated"],
+      carbonScore: "Low (Eco-Friendly)"
+    },
+    {
+      id: "ret-train-3",
+      type: "train",
+      provider: "Superfast Mail Express (12951)",
+      trainName: "Superfast Mail Express",
+      trainNumber: "12951",
+      mode: "🚆 Train • Superfast Mail (12951)",
+      icon: "Train",
+      route: `${nearestRail} ➔ ${origin}`,
+      departureTime: "10:30 AM",
+      arrivalTime: "08:00 PM",
+      timing: "10:30 AM - 08:00 PM",
+      duration: "9h 30m",
+      stops: "Semi-Fast (8 Stops)",
+      price: "₹790",
+      priceNum: 790,
+      cabinClass: "Sleeper (SL) / 3AC",
+      baggage: "Standard Rail Booking",
+      tags: ["Budget Choice", "Daytime Scenic"],
+      carbonScore: "Low (Eco-Friendly)"
+    }
+  ];
+
+  // Return Buses (destination → origin)
+  const buses = [
+    {
+      id: "ret-bus-1",
+      type: "bus",
+      provider: "State RTC Volvo 9600 AC Sleeper",
+      mode: "🚌 Bus • State RTC Volvo AC Sleeper",
+      icon: "Bus",
+      route: `${destName} ➔ ${origin} ISBT`,
+      departureTime: "06:00 PM",
+      arrivalTime: "07:00 AM",
+      timing: "06:00 PM - 07:00 AM",
+      duration: "13h 00m",
+      stops: "Overnight (2 Rest Stops)",
+      price: "₹1,280",
+      priceNum: 1280,
+      cabinClass: "AC Sleeper (Upper/Lower)",
+      baggage: "Direct Central Drop",
+      tags: ["Overnight", "Direct Drop", "State Managed"],
+      carbonScore: "Low"
+    },
+    {
+      id: "ret-bus-2",
+      type: "bus",
+      provider: "Intercity Scania Luxury Express",
+      mode: "🚌 Bus • Intercity Scania AC Coach",
+      icon: "Bus",
+      route: `${destName} ➔ ${origin}`,
+      departureTime: "07:30 PM",
+      arrivalTime: "08:15 AM",
+      timing: "07:30 PM - 08:15 AM",
+      duration: "12h 45m",
+      stops: "Overnight (1 Rest Stop)",
+      price: "₹1,050",
+      priceNum: 1050,
+      cabinClass: "AC Semi-Sleeper",
+      baggage: "Water Bottle & Blanket Provided",
+      tags: ["Budget Friendly", "Reclining Seats"],
+      carbonScore: "Low"
+    }
+  ];
+
+  return { flights, trains, buses };
+}
+
 export function generateSmartItinerary(preferences = {}) {
   const rawDest = (preferences.destination || "Kashmir").trim();
   const originCity = preferences.city || preferences.currentCity || "Delhi";
@@ -350,6 +552,9 @@ export function generateSmartItinerary(preferences = {}) {
     selectedTravel = travelStayCatalog.flights[0] || travelStayCatalog.trains[0];
   }
 
+  // Return transit selection (if provided by the user)
+  const selectedReturnTravel = preferences.selectedReturnTravel || null;
+
   const departTime = selectedTravel?.departureTime || preferences.departTime || "08:00 AM";
   const medicalIssues = preferences.medicalIssues || [];
   const customMedicalInfo = preferences.customMedicalInfo || "";
@@ -435,6 +640,7 @@ export function generateSmartItinerary(preferences = {}) {
     stayRecommendation: selectedStay,
     selectedStay: selectedStay,
     selectedTravel: selectedTravel,
+    selectedReturnTravel: selectedReturnTravel,
     availableTravelOptions: travelStayCatalog,
     availableStays: travelStayCatalog.stays,
     transitModes: [
