@@ -3,7 +3,7 @@ import {
   Calendar, MapPin, Clock, DollarSign, Users, ShieldAlert, Sparkles,
   ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, ChevronRight, Check
 } from "lucide-react";
-import { getTravelAndStayOptions } from "../services/itineraryGenerator";
+import { getTravelAndStayOptions, getReturnTransitOptions } from "../services/itineraryGenerator";
 import { searchRealHotels, searchRealFlights } from "../services/realSearchService";
 import BookingModal from "./BookingModal";
 
@@ -58,8 +58,10 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
   const dest = activePlan.destination;
 
   const travelOptions = activePlan.availableTravelOptions || getTravelAndStayOptions(dest.name, activePlan.city || "Delhi");
+  const returnTravelOptions = activePlan.availableReturnTravelOptions || getReturnTransitOptions(dest.name, activePlan.city || "Delhi");
   const currentSelectedTravel = activePlan.selectedTravel || travelOptions.flights[0] || travelOptions.trains[0];
   const currentSelectedStay = activePlan.selectedStay || activePlan.stayRecommendation || travelOptions.stays[0];
+  const currentSelectedReturnTravel = activePlan.selectedReturnTravel || returnTravelOptions.flights[0] || returnTravelOptions.trains[0];
 
   // Helper to trigger component state update and parent persistence
   function notifyPlanChange(updatedPlan, toastMessage = "") {
@@ -98,6 +100,29 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
     setTimeout(() => setSwapToast(""), 4000);
   }
 
+  function handleSelectReturnTravel(opt) {
+    const updated = { ...activePlan };
+    updated.selectedReturnTravel = opt;
+    // Update the last day's return journey activity
+    if (updated.days && updated.days.length > 0) {
+      const lastDay = updated.days[updated.days.length - 1];
+      const returnActivity = lastDay.activities?.find(a => a.isReturnJourney);
+      if (returnActivity) {
+        const originCity = updated.city || "Delhi";
+        const destName = dest.name || "Destination";
+        returnActivity.slot = `Evening (${opt.departureTime || "04:00 PM"} - ${opt.arrivalTime || "Late Night"})`;
+        returnActivity.title = `Return Journey: ${destName} to ${originCity} via ${opt.provider || opt.mode}`;
+        returnActivity.estCost = `${opt.price || "Transit"} (Return Ticket)`;
+        returnActivity.description = `Depart from ${destName} at ${opt.departureTime || "04:00 PM"} via ${opt.provider || opt.mode} (${opt.route || destName + " to " + originCity}). Duration: ${opt.duration || "~8 hours"}. Arrive at ${originCity} by ${opt.arrivalTime || "late night"}. 💡 Booking Reminder: Book your return ${opt.type || "ticket"} in advance for the best fares and confirmed seats!`;
+      }
+      // Also update the day title
+      lastDay.title = `Day ${lastDay.dayNumber}: Return Journey to ${updated.city || "Delhi"} via ${opt.provider || opt.mode} & Farewell`;
+    }
+    setActivePlan(updated);
+    setSwapToast(`✅ Return travel updated to: ${opt.provider || opt.mode} (${opt.timing}, ${opt.price})`);
+    setTimeout(() => setSwapToast(""), 4000);
+  }
+
   function handleSelectStay(stayOpt) {
     const updated = { ...activePlan };
     updated.selectedStay = stayOpt;
@@ -119,13 +144,27 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
     updated.isFinalized = true;
     updated.selectedTravel = currentSelectedTravel;
     updated.selectedStay = currentSelectedStay;
+    updated.selectedReturnTravel = currentSelectedReturnTravel;
     if (updated.days && updated.days.length > 0) {
+      // Finalize Day 1 (outbound)
       const day1 = updated.days[0];
       if (day1.activities && day1.activities.length > 0) {
         day1.activities[0].slot = `Morning (${currentSelectedTravel.departureTime || '08:00 AM'} - 12:30 PM)`;
         day1.activities[0].title = `Departure from ${updated.city || "Origin"} via ${currentSelectedTravel.provider || currentSelectedTravel.mode} & Check-in at ${currentSelectedStay.name}`;
         day1.activities[0].estCost = `${currentSelectedTravel.price} (Included)`;
         day1.activities[0].description = `Depart at ${currentSelectedTravel.departureTime || '08:00 AM'} (${currentSelectedTravel.route}). Arrive, transfer to ${currentSelectedStay.name}, settle in, and acclimatize with local refreshments.`;
+      }
+      // Finalize Last Day (return journey)
+      const lastDay = updated.days[updated.days.length - 1];
+      const returnActivity = lastDay.activities?.find(a => a.isReturnJourney);
+      if (returnActivity && currentSelectedReturnTravel) {
+        const originCity = updated.city || "Delhi";
+        const destName = dest.name || "Destination";
+        returnActivity.slot = `Evening (${currentSelectedReturnTravel.departureTime || "04:00 PM"} - ${currentSelectedReturnTravel.arrivalTime || "Late Night"})`;
+        returnActivity.title = `Return Journey: ${destName} to ${originCity} via ${currentSelectedReturnTravel.provider || currentSelectedReturnTravel.mode}`;
+        returnActivity.estCost = `${currentSelectedReturnTravel.price || "Transit"} (Return Ticket)`;
+        returnActivity.description = `Depart from ${destName} at ${currentSelectedReturnTravel.departureTime || "04:00 PM"} via ${currentSelectedReturnTravel.provider || currentSelectedReturnTravel.mode} (${currentSelectedReturnTravel.route || destName + " to " + originCity}). Duration: ${currentSelectedReturnTravel.duration || "~8 hours"}. Arrive at ${originCity} by ${currentSelectedReturnTravel.arrivalTime || "late night"}. 💡 Booking Reminder: Book your return ${currentSelectedReturnTravel.type || "ticket"} in advance for the best fares and confirmed seats!`;
+        lastDay.title = `Day ${lastDay.dayNumber}: Return Journey to ${originCity} via ${currentSelectedReturnTravel.provider || currentSelectedReturnTravel.mode} & Farewell`;
       }
     }
     setActivePlan(updated);
@@ -867,6 +906,45 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
           </div>
         </div>
       </div>
+
+      {/* Confirmed Return Travel Card */}
+      {currentSelectedReturnTravel && (
+        <div className="p-5 rounded-3xl bg-purple-50 border-2 border-purple-300 shadow-sm space-y-2 relative">
+          <div className="flex items-start justify-between gap-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xl">🔙</span>
+              <div>
+                <span className="text-[10px] font-black uppercase text-purple-800 bg-purple-200 px-2 py-0.5 rounded-md">
+                  Confirmed Return Travel
+                </span>
+                <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedReturnTravel.provider || currentSelectedReturnTravel.mode}</h4>
+              </div>
+            </div>
+            <div className="text-right">
+              <span className="font-black text-sm text-emerald-800 bg-white border border-purple-200 px-2.5 py-1 rounded-xl shadow-sm block">
+                {currentSelectedReturnTravel.price}
+              </span>
+            </div>
+          </div>
+          <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
+            <p className="text-slate-900 font-bold">Route: {currentSelectedReturnTravel.route}</p>
+            <p className="text-slate-600">Schedule: {currentSelectedReturnTravel.timing || currentSelectedReturnTravel.departureTime} • {currentSelectedReturnTravel.duration}</p>
+            <p className="text-slate-500 text-[11px]">{currentSelectedReturnTravel.cabinClass || currentSelectedReturnTravel.stops}</p>
+          </div>
+          <div className="pt-2 flex items-center justify-between">
+            <span className="text-[10px] font-black text-purple-800 flex items-center gap-1">
+              <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> Integrated in Day {activePlan.duration || activePlan.days.length} Departure
+            </span>
+            <button
+              type="button"
+              onClick={() => handleOpenBookingModal(currentSelectedReturnTravel, "flight")}
+              className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] flex items-center gap-1 shadow-xs transition"
+            >
+              🎫 Book Return Ticket
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Action / Notification Toast */}
       {swapToast && (

@@ -538,6 +538,9 @@ export function generateSmartItinerary(preferences = {}) {
   // Generate available multiple options
   const travelStayCatalog = getTravelAndStayOptions(matchedDest, originCity);
 
+  // Generate return transit options (destination → origin)
+  const returnTransitCatalog = getReturnTransitOptions(matchedDest, originCity);
+
   // User's specific Selected Stay
   let selectedStay = preferences.selectedStay;
   if (!selectedStay) {
@@ -552,8 +555,20 @@ export function generateSmartItinerary(preferences = {}) {
     selectedTravel = travelStayCatalog.flights[0] || travelStayCatalog.trains[0];
   }
 
-  // Return transit selection (if provided by the user)
-  const selectedReturnTravel = preferences.selectedReturnTravel || null;
+  // Auto-select return transit matching the outbound transport type
+  let selectedReturnTravel = preferences.selectedReturnTravel || null;
+  if (!selectedReturnTravel) {
+    const outboundType = selectedTravel?.type || "flight";
+    if (outboundType === "flight") {
+      selectedReturnTravel = returnTransitCatalog.flights[0] || returnTransitCatalog.trains[0];
+    } else if (outboundType === "train") {
+      selectedReturnTravel = returnTransitCatalog.trains[0] || returnTransitCatalog.flights[0];
+    } else if (outboundType === "bus") {
+      selectedReturnTravel = returnTransitCatalog.buses[0] || returnTransitCatalog.trains[0];
+    } else {
+      selectedReturnTravel = returnTransitCatalog.flights[0] || returnTransitCatalog.trains[0];
+    }
+  }
 
   const departTime = selectedTravel?.departureTime || preferences.departTime || "08:00 AM";
   const medicalIssues = preferences.medicalIssues || [];
@@ -563,8 +578,9 @@ export function generateSmartItinerary(preferences = {}) {
   const baseAttractions = matchedDest.attractions;
 
   for (let i = 1; i <= duration; i++) {
+    const isLastDay = i === duration;
     const dayTheme = i === 1 ? `Departure via ${selectedTravel.provider || selectedTravel.mode}, Arrival & Acclimatization`
-      : i === duration ? "Local Souvenirs, Cultural Markets & Farewell"
+      : isLastDay ? `Return Journey to ${originCity} via ${selectedReturnTravel.provider || selectedReturnTravel.mode} & Farewell`
       : `Exploring Highlights & Scenic Circuit (Part ${i - 1})`;
 
     const primaryAttr = baseAttractions[(i - 1) % baseAttractions.length];
@@ -574,44 +590,67 @@ export function generateSmartItinerary(preferences = {}) {
       {
         id: `day-${i}-morning`,
         slot: i === 1 ? `Morning (${departTime} - 12:30 PM)` : "Morning (08:30 AM - 12:00 PM)",
-        title: i === 1 ? `Departure from ${originCity} via ${selectedTravel.provider || selectedTravel.mode} & Check-in at ${selectedStay.name}` : primaryAttr.name,
-        type: i === 1 ? "Transit & Check-in" : "Sightseeing",
-        crowdScore: i === 1 ? 40 : primaryAttr.crowdScore,
-        crowdLevel: i === 1 ? "Low" : primaryAttr.crowdLevel,
-        estCost: i === 1 ? `${selectedTravel.price || "Transit"} (Included)` : primaryAttr.cost,
-        description: i === 1 
+        title: i === 1
+          ? `Departure from ${originCity} via ${selectedTravel.provider || selectedTravel.mode} & Check-in at ${selectedStay.name}`
+          : isLastDay
+            ? `Check out from ${selectedStay.name} & Local Souvenirs Shopping`
+            : primaryAttr.name,
+        type: i === 1 ? "Transit & Check-in" : isLastDay ? "Checkout & Shopping" : "Sightseeing",
+        crowdScore: i === 1 ? 40 : isLastDay ? 35 : primaryAttr.crowdScore,
+        crowdLevel: i === 1 ? "Low" : isLastDay ? "Low" : primaryAttr.crowdLevel,
+        estCost: i === 1 ? `${selectedTravel.price || "Transit"} (Included)` : isLastDay ? "₹500 - ₹2,000 (Souvenirs)" : primaryAttr.cost,
+        description: i === 1
           ? `Depart at ${departTime} (${selectedTravel.route || originCity + " to " + matchedDest.name}). Arrive, transfer to ${selectedStay.name}, settle in, and acclimatize with local refreshments.${medicalIssues.length > 0 ? " (Health condition noted: relaxed pace on arrival)." : ""}`
-          : primaryAttr.description,
-        tags: i === 1 ? ["Transit", "Stay", "Arrival"] : primaryAttr.tags,
+          : isLastDay
+            ? `Check out from ${selectedStay.name} by 11:00 AM. Visit local artisan markets and pick up authentic regional souvenirs and handicrafts before your return journey.`
+            : primaryAttr.description,
+        tags: i === 1 ? ["Transit", "Stay", "Arrival"] : isLastDay ? ["Checkout", "Souvenirs", "Last Day"] : primaryAttr.tags,
         isSwapped: false,
-        offbeatAlternative: primaryAttr.offbeatAlternative
+        offbeatAlternative: isLastDay ? null : primaryAttr.offbeatAlternative
       },
       {
         id: `day-${i}-afternoon`,
-        slot: "Afternoon (01:00 PM - 04:30 PM)",
-        title: secondaryAttr.name,
-        type: "Adventure & Sightseeing",
-        crowdScore: secondaryAttr.crowdScore,
-        crowdLevel: secondaryAttr.crowdLevel,
-        estCost: secondaryAttr.cost,
-        description: secondaryAttr.description,
-        tags: secondaryAttr.tags,
+        slot: isLastDay ? "Afternoon (12:30 PM - 03:00 PM)" : "Afternoon (01:00 PM - 04:30 PM)",
+        title: isLastDay ? `Farewell Lunch & Cultural Markets in ${matchedDest.name}` : secondaryAttr.name,
+        type: isLastDay ? "Food & Farewell" : "Adventure & Sightseeing",
+        crowdScore: isLastDay ? 50 : secondaryAttr.crowdScore,
+        crowdLevel: isLastDay ? "Moderate" : secondaryAttr.crowdLevel,
+        estCost: isLastDay ? "₹400 - ₹800 per person" : secondaryAttr.cost,
+        description: isLastDay
+          ? `Enjoy a farewell meal at a top-rated local restaurant in ${matchedDest.name}. Stroll through cultural markets one last time and soak in the atmosphere before heading to the station/airport.`
+          : secondaryAttr.description,
+        tags: isLastDay ? ["Farewell", "Cuisine", "Culture"] : secondaryAttr.tags,
         isSwapped: false,
-        offbeatAlternative: secondaryAttr.offbeatAlternative
+        offbeatAlternative: isLastDay ? null : secondaryAttr.offbeatAlternative
       },
-      {
-        id: `day-${i}-evening`,
-        slot: "Evening (05:30 PM - 08:30 PM)",
-        title: "Sunset Viewpoint & Authentic Local Food Crawl",
-        type: "Food & Culture",
-        crowdScore: 55,
-        crowdLevel: "Moderate",
-        estCost: "₹400 - ₹800 per person",
-        description: "Taste authentic regional delicacies, stroll through pedestrian artisan markets, and enjoy golden hour reflections.",
-        tags: ["Cuisine", "Artisans", "Sunset"],
-        isSwapped: false,
-        offbeatAlternative: null
-      }
+      isLastDay
+        ? {
+            id: `day-${i}-return`,
+            slot: `Evening (${selectedReturnTravel.departureTime || "04:00 PM"} - ${selectedReturnTravel.arrivalTime || "Late Night"})`,
+            title: `Return Journey: ${matchedDest.name} to ${originCity} via ${selectedReturnTravel.provider || selectedReturnTravel.mode}`,
+            type: "Return Transit",
+            crowdScore: 30,
+            crowdLevel: "Low",
+            estCost: `${selectedReturnTravel.price || "Transit"} (Return Ticket)`,
+            description: `Depart from ${matchedDest.name} at ${selectedReturnTravel.departureTime || "04:00 PM"} via ${selectedReturnTravel.provider || selectedReturnTravel.mode} (${selectedReturnTravel.route || matchedDest.name + " to " + originCity}). Duration: ${selectedReturnTravel.duration || "~8 hours"}. Arrive at ${originCity} by ${selectedReturnTravel.arrivalTime || "late night"}. 💡 Booking Reminder: Book your return ${selectedReturnTravel.type || "ticket"} in advance for the best fares and confirmed seats!`,
+            tags: ["Return Transit", "Departure", "Booking Reminder"],
+            isSwapped: false,
+            offbeatAlternative: null,
+            isReturnJourney: true
+          }
+        : {
+            id: `day-${i}-evening`,
+            slot: "Evening (05:30 PM - 08:30 PM)",
+            title: "Sunset Viewpoint & Authentic Local Food Crawl",
+            type: "Food & Culture",
+            crowdScore: 55,
+            crowdLevel: "Moderate",
+            estCost: "₹400 - ₹800 per person",
+            description: "Taste authentic regional delicacies, stroll through pedestrian artisan markets, and enjoy golden hour reflections.",
+            tags: ["Cuisine", "Artisans", "Sunset"],
+            isSwapped: false,
+            offbeatAlternative: null
+          }
     ];
 
     days.push({
@@ -669,6 +708,8 @@ export function generateSmartItinerary(preferences = {}) {
         carbonScore: t.carbonScore
       }))
     ],
+    availableReturnTravelOptions: returnTransitCatalog,
+    city: originCity,
     days,
     generatedAt: new Date().toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })
   };
