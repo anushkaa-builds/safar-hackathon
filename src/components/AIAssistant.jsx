@@ -33,11 +33,15 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
     const unsubscribe = monitorService.subscribe((currentAlerts) => {
       setAlerts(currentAlerts);
     });
-    monitorService.startMonitoring(destName);
+    if (activeItinerary) {
+      monitorService.monitorUserItinerary(activeItinerary);
+    } else {
+      monitorService.startMonitoring(destName);
+    }
     return () => {
       unsubscribe();
     };
-  }, [destName]);
+  }, [destName, activeItinerary]);
 
   // Check backend health & status on mount
   useEffect(() => {

@@ -6,10 +6,11 @@ import ReviewsView from "./components/ReviewsView";
 import AlertToast from "./components/AlertToast";
 import EmergencyModal from "./components/EmergencyModal";
 import MyBookingsModal from "./components/MyBookingsModal";
+import ErrorBoundary from "./components/ErrorBoundary";
 import monitorService from "./services/monitoringService";
 import { generateSmartItinerary } from "./services/itineraryGenerator";
-import { getPreferences } from "./services/preferences";
-import { ShieldAlert, Compass, Calendar, Bot, Star } from "lucide-react";
+import { getPreferences, getSavedItinerary, saveItinerary, clearSavedItinerary } from "./services/preferences";
+import { ShieldAlert, Compass, Calendar, Bot, Star, Ticket, LogOut } from "lucide-react";
 
 const tabs = [
   { id: "planner", label: "🎯 Plan Yatra", icon: Compass },
@@ -29,42 +30,52 @@ export default function Dashboard({ user, onLogout }) {
 
   useEffect(() => {
     const userId = localStorage.getItem("safar_user_id") || "demo_user";
-    getPreferences(userId).then((prefs) => {
-      if (prefs) {
-        const plan = generateSmartItinerary(prefs);
-        setCurrentItinerary(plan);
-      } else {
-        const defaultPlan = generateSmartItinerary({ destination: "Kashmir", holidays: 5, budget: 450 });
-        setCurrentItinerary(defaultPlan);
+    getSavedItinerary(userId).then((savedPlan) => {
+      if (savedPlan) {
+        setCurrentItinerary(savedPlan);
+        monitorService.monitorUserItinerary(savedPlan);
+        return;
       }
+      getPreferences(userId).then((prefs) => {
+        if (prefs) {
+          const plan = generateSmartItinerary(prefs);
+          setCurrentItinerary(plan);
+          monitorService.monitorUserItinerary(plan);
+        }
+      });
     });
 
     const unsubscribe = monitorService.subscribe((alerts) => {
       setActiveAlerts(alerts);
+      // Never interrupt the user with alert popups while they are designing their trip in the planner
       const newSevere = alerts.find(a => a.isNew);
-      if (newSevere) {
+      if (newSevere && activeTab !== "planner") {
         setToastAlert(newSevere);
       }
-      const count = alerts.filter(a => a.isNew).length || (alerts.length > 0 ? 1 : 0);
-      setUnreadAlertsCount(prev => (prev === 0 ? count : prev));
+      const count = alerts.filter(a => a.isNew).length;
+      setUnreadAlertsCount(count);
     });
 
     return () => {
       unsubscribe();
     };
-  }, [user]);
+  }, [user, activeTab]);
 
   function handleTabChange(tabId) {
     setActiveTab(tabId);
+    if (tabId === "planner" || tabId === "assistant") {
+      setToastAlert(null);
+    }
     if (tabId === "assistant") {
       setUnreadAlertsCount(0);
-      setToastAlert(null);
     }
   }
 
-  function handleDismissToast() {
+  function handleDismissToast(alertId) {
     setToastAlert(null);
-    setUnreadAlertsCount(0);
+    if (alertId) {
+      monitorService.dismissAlert(alertId);
+    }
   }
 
   function handleItineraryReady(newPlan) {
@@ -72,7 +83,7 @@ export default function Dashboard({ user, onLogout }) {
     saveItinerary(userId, newPlan);
     setCurrentItinerary(newPlan);
     setActiveTab("itinerary");
-    monitorService.startMonitoring(newPlan.destination.name);
+    monitorService.monitorUserItinerary(newPlan);
   }
 
   function handleUpdateItinerary(updatedPlan) {
@@ -96,7 +107,7 @@ export default function Dashboard({ user, onLogout }) {
   }
 
   function handleSwapFromToast() {
-    if (currentItinerary && currentItinerary.days.length > 0) {
+    if (currentItinerary && currentItinerary.days?.length > 0) {
       const updated = { ...currentItinerary };
       const targetAct = updated.days[0].activities[1];
       if (targetAct && targetAct.offbeatAlternative) {
@@ -204,14 +215,16 @@ export default function Dashboard({ user, onLogout }) {
           <PlanYatra onItineraryGenerated={handleItineraryReady} />
         )}
         {activeTab === "itinerary" && (
-          <ItineraryView
-            itinerary={currentItinerary}
-            onUpdateItinerary={handleUpdateItinerary}
-            onResetItinerary={handleResetItinerary}
-            onRegenerate={() => handleTabChange("planner")}
-            onOpenSOS={() => setSosOpen(true)}
-            onOpenMyBookings={() => setBookingsModalOpen(true)}
-          />
+          <ErrorBoundary onReset={handleResetItinerary}>
+            <ItineraryView
+              itinerary={currentItinerary}
+              onUpdateItinerary={handleUpdateItinerary}
+              onResetItinerary={handleResetItinerary}
+              onRegenerate={() => handleTabChange("planner")}
+              onOpenSOS={() => setSosOpen(true)}
+              onOpenMyBookings={() => setBookingsModalOpen(true)}
+            />
+          </ErrorBoundary>
         )}
         {activeTab === "assistant" && (
           <AIAssistant

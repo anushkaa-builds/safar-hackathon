@@ -1,17 +1,50 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Calendar, MapPin, Clock, DollarSign, Users, ShieldAlert, Sparkles,
-  ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, ChevronRight, Check
+  ArrowRightLeft, Hotel, Plane, Train, Bus, Download, Share2, CheckCircle2, ChevronRight, Check,
+  ArrowDown, ArrowRight, ArrowUp, CreditCard, Edit3, GripVertical, Plus, RotateCcw, Search, Trash2, X
 } from "lucide-react";
 import { getTravelAndStayOptions, getReturnTransitOptions } from "../services/itineraryGenerator";
 import { searchRealHotels, searchRealFlights } from "../services/realSearchService";
 import BookingModal from "./BookingModal";
 
-export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
+export const SLOT_PRESETS = [
+  "Morning (09:00 AM - 12:30 PM)",
+  "Afternoon (01:30 PM - 05:00 PM)",
+  "Evening (05:30 PM - 08:30 PM)",
+  "Night (09:00 PM - 11:00 PM)"
+];
+
+export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOpenMyBookings, onUpdateItinerary, onResetItinerary }) {
   const [selectedDayIndex, setSelectedDayIndex] = useState(0);
   const [activePlan, setActivePlan] = useState(itinerary);
+  const [isFinalized, setIsFinalized] = useState(itinerary?.isFinalized ?? false);
   const [swapToast, setSwapToast] = useState("");
   const [transitTab, setTransitTab] = useState("flight");
+
+  // Day Title Editing State
+  const [isEditingDayTitle, setIsEditingDayTitle] = useState(false);
+  const [dayTitleInput, setDayTitleInput] = useState("");
+
+  // Activity Drag-and-Drop Reordering State
+  const [draggedActIndex, setDraggedActIndex] = useState(null);
+  const [dragOverActIndex, setDragOverActIndex] = useState(null);
+
+  // Activity Edit Modal State
+  const [editingActivity, setEditingActivity] = useState(null);
+
+  // Activity Add Modal State
+  const [isAddingActivity, setIsAddingActivity] = useState(false);
+  const [newActivity, setNewActivity] = useState({
+    title: "",
+    slot: SLOT_PRESETS[0],
+    type: "Sightseeing",
+    estCost: "₹200 - ₹500 per person",
+    crowdLevel: "Low",
+    crowdScore: 30,
+    description: "",
+    tags: "Sightseeing, Leisure"
+  });
 
   // Live Search States
   const [staySearchTab, setStaySearchTab] = useState("ai");
@@ -30,6 +63,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
   useEffect(() => {
     if (itinerary) {
       setActivePlan(itinerary);
+      setIsFinalized(itinerary.isFinalized ?? false);
     }
   }, [itinerary]);
 
@@ -1202,36 +1236,36 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
                       )}
                     </div>
 
-                    {/* Crowd Meter Badge */}
-                    <div className="flex items-center gap-2 text-xs font-black">
-                      <span className="text-slate-500">Live Crowd:</span>
-                      <span className={`px-2.5 py-1 rounded-lg ${act.crowdScore > 80 ? "bg-rose-100 text-rose-800" : act.crowdScore > 50 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
-                        }`}>
-                        {act.crowdScore}% ({act.crowdLevel})
-                      </span>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {/* Crowd Meter Badge */}
+                      <div className="flex items-center gap-2 text-xs font-black">
+                        <span className="text-slate-500">Live Crowd:</span>
+                        <span className={`px-2.5 py-1 rounded-lg ${act.crowdScore > 80 ? "bg-rose-100 text-rose-800" : act.crowdScore > 50 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
+                          }`}>
+                          {act.crowdScore}% ({act.crowdLevel})
+                        </span>
+                      </div>
+
+                      {/* Edit Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleStartEditActivity(safeDayIndex, actIdx, act)}
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 shadow-xs transition"
+                        title="Edit Activity"
+                      >
+                        <Edit3 className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Delete Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteActivity(safeDayIndex, actIdx)}
+                        className="p-1.5 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-xs transition"
+                        title="Delete Activity"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
-                  </div>
-
-                  {/* Edit Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleStartEditActivity(safeDayIndex, actIdx, act)}
-                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 shadow-xs transition"
-                    title="Edit Activity"
-                  >
-                    <Edit3 className="w-3.5 h-3.5" />
-                  </button>
-
-                  {/* Delete Button */}
-                  <button
-                    type="button"
-                    onClick={() => handleDeleteActivity(safeDayIndex, actIdx)}
-                    className="p-1.5 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-xs transition"
-                    title="Delete Activity"
-                  >
-                    <Trash2 className="w-3.5 h-3.5" />
-                  </button>
-                </div>
                   </div>
 
         {/* Main Activity Info */}
@@ -1262,7 +1296,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
         </div>
       </div>
       );
-          })}
+    }))}
     </div>
       </div >
 
@@ -1442,6 +1476,301 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS }) {
   </div>
         </div >
       </div >
+
+      {/* STRIPE & PNR BOOKING MODAL */}
+      {bookingModalState.isOpen && (
+        <BookingModal
+          isOpen={bookingModalState.isOpen}
+          onClose={() => setBookingModalState({ isOpen: false, item: null, type: "hotel" })}
+          item={bookingModalState.item}
+          type={bookingModalState.type}
+          destination={dest?.name || "Destination"}
+          onBookingComplete={handleBookingSuccess}
+        />
+      )}
+
+      {/* EDIT ACTIVITY MODAL */}
+      {editingActivity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Edit3 className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-black text-lg text-slate-900">Edit Activity</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setEditingActivity(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveEditedActivity} className="space-y-4">
+              <div>
+                <label className="block text-xs font-black text-slate-700 mb-1">Activity Title</label>
+                <input
+                  type="text"
+                  required
+                  value={editingActivity.data.title}
+                  onChange={(e) => setEditingActivity({
+                    ...editingActivity,
+                    data: { ...editingActivity.data, title: e.target.value }
+                  })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 font-bold text-sm focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Time Slot</label>
+                  <select
+                    value={editingActivity.data.slot}
+                    onChange={(e) => setEditingActivity({
+                      ...editingActivity,
+                      data: { ...editingActivity.data, slot: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  >
+                    {SLOT_PRESETS.map((slot) => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Category</label>
+                  <select
+                    value={editingActivity.data.type}
+                    onChange={(e) => setEditingActivity({
+                      ...editingActivity,
+                      data: { ...editingActivity.data, type: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="Sightseeing">Sightseeing</option>
+                    <option value="Food & Culture">Food & Culture</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Nature">Nature</option>
+                    <option value="Relaxation">Relaxation</option>
+                    <option value="Shopping">Shopping</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Estimated Cost</label>
+                  <input
+                    type="text"
+                    value={editingActivity.data.estCost}
+                    onChange={(e) => setEditingActivity({
+                      ...editingActivity,
+                      data: { ...editingActivity.data, estCost: e.target.value }
+                    })}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    placeholder="₹300 - ₹600"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Crowd Score ({editingActivity.data.crowdScore}%)</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="95"
+                    value={editingActivity.data.crowdScore}
+                    onChange={(e) => {
+                      const score = Number(e.target.value);
+                      const level = score > 75 ? "High (Peak)" : score > 45 ? "Moderate" : "Low (Serene)";
+                      setEditingActivity({
+                        ...editingActivity,
+                        data: { ...editingActivity.data, crowdScore: score, crowdLevel: level }
+                      });
+                    }}
+                    className="w-full accent-emerald-600 mt-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 mb-1">Description & Details</label>
+                <textarea
+                  rows="3"
+                  value={editingActivity.data.description}
+                  onChange={(e) => setEditingActivity({
+                    ...editingActivity,
+                    data: { ...editingActivity.data, description: e.target.value }
+                  })}
+                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-semibold text-xs focus:border-emerald-500 focus:outline-none resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 mb-1">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  value={editingActivity.data.tags}
+                  onChange={(e) => setEditingActivity({
+                    ...editingActivity,
+                    data: { ...editingActivity.data, tags: e.target.value }
+                  })}
+                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  placeholder="Culture, Photography, Lake"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setEditingActivity(null)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5"
+                >
+                  <Check className="w-3.5 h-3.5" />
+                  <span>Save Changes</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ADD ACTIVITY MODAL */}
+      {isAddingActivity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center gap-2">
+                <Plus className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-black text-lg text-slate-900">Add New Activity (Day {currentDay.dayNumber})</h3>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsAddingActivity(false)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSaveNewActivity} className="space-y-4">
+              <div>
+                <label className="block text-xs font-black text-slate-700 mb-1">Activity Title</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Shikara Ride on Dal Lake at Sunset"
+                  value={newActivity.title}
+                  onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 font-bold text-sm focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Time Slot</label>
+                  <select
+                    value={newActivity.slot}
+                    onChange={(e) => setNewActivity({ ...newActivity, slot: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  >
+                    {SLOT_PRESETS.map((slot) => (
+                      <option key={slot} value={slot}>{slot}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Category</label>
+                  <select
+                    value={newActivity.type}
+                    onChange={(e) => setNewActivity({ ...newActivity, type: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="Sightseeing">Sightseeing</option>
+                    <option value="Food & Culture">Food & Culture</option>
+                    <option value="Adventure">Adventure</option>
+                    <option value="Nature">Nature</option>
+                    <option value="Relaxation">Relaxation</option>
+                    <option value="Shopping">Shopping</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Estimated Cost</label>
+                  <input
+                    type="text"
+                    value={newActivity.estCost}
+                    onChange={(e) => setNewActivity({ ...newActivity, estCost: e.target.value })}
+                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    placeholder="₹500 per person"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-black text-slate-700 mb-1">Crowd Score ({newActivity.crowdScore}%)</label>
+                  <input
+                    type="range"
+                    min="10"
+                    max="95"
+                    value={newActivity.crowdScore}
+                    onChange={(e) => {
+                      const score = Number(e.target.value);
+                      const level = score > 75 ? "High (Peak)" : score > 45 ? "Moderate" : "Low (Serene)";
+                      setNewActivity({ ...newActivity, crowdScore: score, crowdLevel: level });
+                    }}
+                    className="w-full accent-emerald-600 mt-2"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 mb-1">Description & Highlights</label>
+                <textarea
+                  rows="3"
+                  placeholder="Describe the experience, meeting location, or tips..."
+                  value={newActivity.description}
+                  onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-semibold text-xs focus:border-emerald-500 focus:outline-none resize-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-black text-slate-700 mb-1">Tags (comma-separated)</label>
+                <input
+                  type="text"
+                  placeholder="Scenic, Sunset, Lake"
+                  value={newActivity.tags}
+                  onChange={(e) => setNewActivity({ ...newActivity, tags: e.target.value })}
+                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+                <button
+                  type="button"
+                  onClick={() => setIsAddingActivity(false)}
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add to Day {currentDay.dayNumber}</span>
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div >
   );
 }
