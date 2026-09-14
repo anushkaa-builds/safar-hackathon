@@ -5,6 +5,7 @@ import {
   AlertTriangle, BookOpen, ExternalLink
 } from "lucide-react";
 import monitorService from "../services/monitoringService";
+import FormattedMessage from "./FormattedMessage";
 
 export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpenSOS }) {
   const [alerts, setAlerts] = useState([]);
@@ -368,16 +369,17 @@ export default function AIAssistant({ activeItinerary, onSwapAlternative, onOpen
                 </div>
                 <div className={`max-w-[80%] space-y-1.5 ${m.sender === "user" ? "items-end" : "items-start"}`}>
                   <div
-                    className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-medium shadow-sm ${
+                    className={`p-4 rounded-2xl text-xs sm:text-sm leading-relaxed font-medium shadow-sm ${
                       m.sender === "user"
                         ? "bg-slate-900 text-white rounded-tr-none"
                         : "bg-slate-100 text-slate-900 rounded-tl-none border border-slate-200"
                     }`}
                   >
-                    {m.text}
-                    {m.isStreaming && (
-                      <span className="inline-block w-2 h-4 ml-1 bg-emerald-600 animate-pulse align-middle" />
-                    )}
+                    <FormattedMessage
+                      content={m.text}
+                      isUser={m.sender === "user"}
+                      isStreaming={m.isStreaming}
+                    />
                   </div>
 
                   {/* Sources / Knowledge Grounding Badge */}
