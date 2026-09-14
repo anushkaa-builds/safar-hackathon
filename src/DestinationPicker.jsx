@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import destinationsData from "./data/destinationsData";
-import { Search, MapPin, Check } from "lucide-react";
+import { Search, MapPin, Check, X } from "lucide-react";
 
 export default function DestinationPicker({ isOpen, onClose, onSelect }) {
   const [search, setSearch] = useState("");
@@ -8,7 +8,7 @@ export default function DestinationPicker({ isOpen, onClose, onSelect }) {
 
   if (!isOpen) return null;
 
-  const categories = ["all", "Mountains", "Beach", "Heritage", "Adventure & Spiritual", "Nature & Eco-Tourism"];
+  const categories = ["all", "Mountains", "Beach", "Heritage", "Adventure & Spiritual", "Nature & Eco-Tourism", "Desert & Culture"];
 
   const filtered = destinationsData.filter(dest => {
     const matchesSearch = dest.name.toLowerCase().includes(search.toLowerCase()) || dest.state.toLowerCase().includes(search.toLowerCase());
@@ -18,32 +18,38 @@ export default function DestinationPicker({ isOpen, onClose, onSelect }) {
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-md flex items-center justify-center p-4 animate-fade-in"
+      className="fixed inset-0 z-50 bg-[#172536]/75 backdrop-blur-xs flex items-center justify-center p-4 animate-fade-in"
       onClick={onClose}
     >
       <div
-        className="bg-white border-2 border-slate-200 rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
+        className="bg-white border border-[#E5E0D8] rounded-3xl w-full max-w-4xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh]"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-5 border-b border-slate-100 bg-gradient-to-r from-emerald-50 via-teal-50 to-amber-50 flex items-center justify-between">
+        <div className="p-6 border-b border-[#E5E0D8] bg-[#FAF8F5] flex items-center justify-between">
           <div>
-            <h3 className="font-black text-xl text-slate-900">Choose Destination</h3>
-            <p className="text-xs text-slate-500 font-semibold">Select from popular circuits or type any destination in India</p>
+            <span className="text-[10px] uppercase font-bold tracking-wider text-[#E99A25]">Curated Circuits</span>
+            <h3 className="font-serif text-2xl text-[#172536] font-normal">Choose Destination</h3>
+            <p className="text-xs text-[#64748B]">Select from curated Indian circuits or type any custom town or valley</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-900 font-black text-xl px-2">✕</button>
+          <button
+            onClick={onClose}
+            className="w-8 h-8 rounded-full border border-[#E5E0D8] bg-white flex items-center justify-center text-[#64748B] hover:text-[#172536] hover:border-[#172536] transition cursor-pointer"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
 
         {/* Search & Custom Place Field */}
-        <div className="p-4 bg-slate-50 border-b border-slate-200 space-y-3">
+        <div className="p-4 bg-white border-b border-[#E5E0D8] space-y-3">
           <div className="flex gap-2">
             <div className="relative flex-1">
-              <Search className="w-4 h-4 text-slate-400 absolute left-4 top-3.5" />
+              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
               <input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search or type any place (e.g. Manali, Ooty, Kashmir, Jaipur, Darjeeling...)"
-                className="w-full pl-11 pr-4 py-2.5 bg-white border border-slate-300 rounded-2xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                placeholder="Search or type any place (e.g. Kutch, Manali, Ooty, Kashmir, Jaipur, Darjeeling...)"
+                className="w-full pl-10 pr-4 py-2.5 bg-[#FAF8F5] border border-[#E5E0D8] focus:border-[#172536] rounded-xl text-xs font-semibold text-[#172536] focus:outline-none transition"
               />
             </div>
             {search.trim() && (
@@ -53,32 +59,32 @@ export default function DestinationPicker({ isOpen, onClose, onSelect }) {
                   onSelect(search.trim());
                   onClose();
                 }}
-                className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs rounded-2xl shadow-md transition shrink-0"
+                className="px-4 py-2.5 bg-[#172536] hover:bg-[#22344a] text-white font-bold text-xs rounded-xl shadow-xs transition shrink-0 cursor-pointer"
               >
                 Use "{search.trim()}"
               </button>
             )}
           </div>
 
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-none">
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-none">
             {categories.map((c) => (
               <button
                 key={c}
                 onClick={() => setSelectedCategory(c)}
-                className={`px-3 py-1.5 rounded-xl text-[11px] font-black shrink-0 transition ${
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition cursor-pointer ${
                   selectedCategory === c
-                    ? "bg-emerald-600 text-white shadow-sm"
-                    : "bg-white text-slate-700 border border-slate-200 hover:border-slate-300"
+                    ? "bg-[#172536] text-white shadow-2xs"
+                    : "bg-[#FAF8F5] text-[#64748B] border border-[#E5E0D8] hover:border-[#CBD5E1]"
                 }`}
               >
-                {c === "all" ? "✨ All Places" : c}
+                {c === "all" ? "All Places" : c}
               </button>
             ))}
           </div>
         </div>
 
         {/* Destination Cards Grid */}
-        <div className="p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+        <div className="p-6 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {filtered.map((dest) => (
             <button
               key={dest.id}
@@ -86,25 +92,25 @@ export default function DestinationPicker({ isOpen, onClose, onSelect }) {
                 onSelect(dest.name);
                 onClose();
               }}
-              className="group relative rounded-2xl overflow-hidden h-40 shadow-md hover:shadow-xl transition-all text-left border-2 border-transparent hover:border-emerald-500 hover:scale-[1.02]"
+              className="group relative rounded-2xl overflow-hidden h-44 shadow-xs hover:shadow-md transition-all text-left border border-[#E5E0D8] hover:border-[#172536] cursor-pointer"
               style={{
                 backgroundImage: `url(${dest.image})`,
                 backgroundSize: "cover",
                 backgroundPosition: "center",
               }}
             >
-              <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/30 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-[#172536] via-[#172536]/40 to-transparent" />
               
               <div className="absolute top-3 left-3">
-                <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-sm">
+                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-white/20 text-white backdrop-blur-xs">
                   {dest.category}
                 </span>
               </div>
 
               <div className="absolute bottom-0 left-0 right-0 p-3.5 space-y-0.5">
-                <p className="text-white font-black text-base leading-snug">{dest.name}</p>
-                <p className="text-white/80 text-[11px] font-medium line-clamp-1">{dest.tagline}</p>
-                <div className="flex items-center gap-2 pt-1 text-[10px] text-emerald-300 font-bold">
+                <p className="text-white font-serif text-lg font-normal leading-snug">{dest.name}</p>
+                <p className="text-slate-300 text-[11px] font-medium line-clamp-1">{dest.tagline}</p>
+                <div className="flex items-center gap-2 pt-1 text-[10px] text-[#E99A25] font-semibold">
                   <span>🏔️ {dest.altitudeUnit}</span>
                 </div>
               </div>

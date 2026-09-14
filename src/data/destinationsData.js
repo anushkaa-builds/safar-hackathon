@@ -580,6 +580,120 @@ export const destinationsData = [
         }
       }
     ]
+  },
+  {
+    id: "kutch",
+    name: "Kutch",
+    state: "Gujarat",
+    image: "https://images.unsplash.com/photo-1578922746465-3a80a228f223?auto=format&fit=crop&w=1200&q=80",
+    tagline: "White Desert, Rogan Art & Starlit Salt Flats",
+    category: "Desert & Culture",
+    altitude: 15,
+    altitudeUnit: "15m (Coastal salt marsh)",
+    safetyRisk: {
+      level: "Low",
+      riskType: "Extreme Day-to-Night Temperature Swing & Remote Desert Roads",
+      amsRisk: "None",
+      advisory: "Carry warm jackets for night desert breeze. Pre-book permits for Dhordo white desert border zone. Keep offline maps.",
+      helpline: "+91-2832-253503 (Bhuj Tourist Reception), 112 (Emergency), 100 (Police)"
+    },
+    transport: {
+      nearestAirport: "Bhuj Airport (BHJ) / Sardar Vallabhbhai Patel Int'l (AMD), Ahmedabad",
+      nearestRailway: "Bhuj Railway Station (BHUJ) - Daily SF trains from Mumbai & Delhi",
+      busConnectivity: "GSRTC Volvo & Sleeper buses from Ahmedabad, Vadodara, and Rajkot",
+      localTransit: "Pre-booked private cabs (₹2,500 - ₹3,800/day for Dhordo/Kalo Dungar circuits)"
+    },
+    stays: [
+      { type: "Budget / Bhunga Homestay", name: "Hodka Village Heritage Bhunga", price: "₹1,400 - ₹2,200/night", rating: 4.8 },
+      { type: "Mid-Range Desert Resort", name: "Kutch Safari Resort / Shaam-e-Sarhad", price: "₹3,800 - ₹6,500/night", rating: 4.85 },
+      { type: "Luxury Tent / Glamping", name: "The Tent City Dhordo / White Rann Resort", price: "₹11,000+/night", rating: 4.9 }
+    ],
+    attractions: [
+      {
+        id: "white-rann-dhordo",
+        name: "Great Rann of Kutch & Sunset Salt Flats",
+        timeSlot: "Evening (04:30 PM - 07:30 PM)",
+        duration: "3 hours",
+        cost: "₹100 permit + ₹50 vehicle",
+        crowdLevel: "Moderate",
+        crowdScore: 60,
+        tags: ["Desert", "Sunset", "Salt Flat", "Photography"],
+        description: "Endless pure white salt crust reflecting ethereal pastel twilight skies and full-moon desert silence.",
+        offbeatAlternative: {
+          name: "Dholavira Harappan Ruins & Road to Heaven",
+          tagline: "UNESCO Harappan metropolis surrounded by turquoise desert salt waters",
+          benefit: "Zero tour bus crowding, 4,500-year-old water reservoirs, sensational drive across Rann.",
+          distance: "Khadir Bet, 130 km from Bhuj",
+          crowdScore: 20
+        }
+      },
+      {
+        id: "kalo-dungar",
+        name: "Kalo Dungar (Black Hill) & Sunset Point",
+        timeSlot: "Afternoon (03:00 PM - 06:00 PM)",
+        duration: "2.5 hours",
+        cost: "Free",
+        crowdLevel: "Low",
+        crowdScore: 35,
+        tags: ["Panoramic", "Trekking", "Nature"],
+        description: "Highest point in Kutch at 462m offering panoramic views of the entire White Rann border landscape.",
+        offbeatAlternative: {
+          name: "Nirona Rogan Art & Bell Maker Village",
+          tagline: "Ancient master craftsmen practicing castor-oil fabric painting and copper bells",
+          benefit: "Direct artisan workshops, live Rogan painting demos, rich cultural interaction.",
+          distance: "40 km from Bhuj",
+          crowdScore: 18
+        }
+      }
+    ]
+  },
+  {
+    id: "tirthan",
+    name: "Tirthan Valley",
+    state: "Himachal Pradesh",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
+    tagline: "Pristine Trout Streams & Great Himalayan National Park",
+    category: "Nature & Eco-Tourism",
+    altitude: 1600,
+    altitudeUnit: "1,600m (Gushaini) - 3,100m (Jalori Pass)",
+    safetyRisk: {
+      level: "Low",
+      riskType: "Narrow Mountain Roads & Jalori Pass Winter Slopes",
+      amsRisk: "Low",
+      advisory: "Ideal peaceful alternative to overcrowded Manali. Carry warm layers. Drive cautiously on Jalori pass descent.",
+      helpline: "+91-1902-252175 (Kullu Tourism & Police), 112 (State Emergency)"
+    },
+    transport: {
+      nearestAirport: "Bhuntar Airport (KUU), Kullu (48 km)",
+      nearestRailway: "Chandigarh (CDG) / Kiratpur Sahib",
+      busConnectivity: "HRTC Volvo to Aut Tunnel, followed by local cab to Gushaini/Jibhi",
+      localTransit: "Local 4x4 mountain taxis (₹1,500 - ₹2,500/day)"
+    },
+    stays: [
+      { type: "Budget Riverside Homestay", name: "Tirthan Pine Riverside Cottage", price: "₹1,200 - ₹2,000/night", rating: 4.8 },
+      { type: "Boutique Wood Chalet", name: "The Blue Stream Eco Chalet", price: "₹3,200 - ₹5,500/night", rating: 4.9 },
+      { type: "Luxury Wilderness Lodge", name: "Khem Bharti Riverside Retreat", price: "₹7,500+/night", rating: 4.95 }
+    ],
+    attractions: [
+      {
+        id: "ghnp-trail",
+        name: "Great Himalayan National Park Eco Trail",
+        timeSlot: "Morning (08:00 AM - 01:00 PM)",
+        duration: "4 hours",
+        cost: "₹100 entry permit",
+        crowdLevel: "Low",
+        crowdScore: 15,
+        tags: ["Nature", "Trekking", "UNESCO", "Trout"],
+        description: "Untouched deodar and oak forests along crystal clear Tirthan river with Himalayan monals and birds.",
+        offbeatAlternative: {
+          name: "Serolsar Lake & Jalori Pass Forest Walk",
+          tagline: "Sacred mountain lake hidden within dense oak canopy near Jalori crest",
+          benefit: "Gentle 5km scenic pine trail, cool mountain breeze, sacred Budhi Nagin temple.",
+          distance: "18 km from Jibhi",
+          crowdScore: 25
+        }
+      }
+    ]
   }
 ];
 

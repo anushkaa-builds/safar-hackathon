@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { supabase } from "./supabaseClient";
-import { Compass, ShieldCheck, Sparkles, Lock, Mail, ArrowRight, UserCheck, AlertCircle, CheckCircle } from "lucide-react";
+import { Lock, Mail, ArrowRight, UserCheck, AlertCircle, CheckCircle, ShieldCheck } from "lucide-react";
 
 export default function Login({ onLoginSuccess }) {
   const [email, setEmail] = useState("");
@@ -24,10 +24,10 @@ export default function Login({ onLoginSuccess }) {
         });
         if (error) throw error;
         if (data.user) {
-          setMessage("🎉 Account created successfully! Logging you in...");
+          setMessage("Account created successfully! Logging you in...");
           setTimeout(() => onLoginSuccess(data.user), 800);
         } else {
-          setMessage("Please check your email to confirm your signup, or use Guest Login!");
+          setMessage("Please check your email to confirm your signup, or use 1-Click Guest Login!");
         }
       } else {
         const { data, error } = await supabase.auth.signInWithPassword({
@@ -49,7 +49,7 @@ export default function Login({ onLoginSuccess }) {
   function handleGuestLogin() {
     const demoUser = {
       id: "guest_" + Math.random().toString(36).substring(2, 9),
-      email: "guest.yatri@yatrisathi.com",
+      email: "guest.yatri@safar.in",
       user_metadata: { name: "Guest Yatri" }
     };
     localStorage.setItem("safar_user_id", demoUser.id);
@@ -58,46 +58,56 @@ export default function Login({ onLoginSuccess }) {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-950 to-teal-950 flex items-center justify-center p-4 sm:p-6">
-      <div className="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-3xl p-8 sm:p-10 shadow-2xl border border-white/20 relative overflow-hidden">
-        {/* Top Glow Accent */}
-        <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-teal-500/20 rounded-full blur-3xl pointer-events-none" />
+    <div className="min-h-screen relative flex items-center justify-center p-4 sm:p-6 font-sans">
+      {/* Immersive background photograph of Indian Himalayas */}
+      <div className="absolute inset-0 overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1598091383021-15ddea10925d?auto=format&fit=crop&w=2000&q=85"
+          alt="Himalayan Valley at Twilight"
+          className="w-full h-full object-cover filter brightness-[0.75]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#172536] via-[#172536]/50 to-[#172536]/70" />
+      </div>
 
+      <div className="w-full max-w-md bg-white rounded-3xl p-8 sm:p-10 shadow-2xl border border-[#E5E0D8] relative z-10 space-y-6">
         {/* Brand Header */}
-        <div className="text-center space-y-3 mb-8">
-          <div className="w-14 h-14 rounded-2xl bg-gradient-to-tr from-emerald-600 via-teal-600 to-teal-500 text-white flex items-center justify-center font-black text-2xl mx-auto shadow-lg shadow-emerald-600/30">
-            🧭
+        <div className="text-center space-y-2">
+          <div className="w-10 h-10 rounded-xl bg-[#172536] text-[#F7F5F0] flex items-center justify-center font-serif text-xl font-bold mx-auto">
+            S
           </div>
           <div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">YatriSathi</h1>
-            <p className="text-xs font-bold text-emerald-700 tracking-wide mt-0.5">
-              AI Tourism & Real Booking Platform
+            <h1 className="font-serif text-3xl font-bold tracking-tight text-[#172536]">SAFAR</h1>
+            <p className="text-[11px] uppercase font-bold tracking-wider text-[#E99A25] mt-0.5">
+              Discover India, Beyond the Ordinary
             </p>
           </div>
-          <p className="text-xs text-slate-500 font-medium">
-            {isSignUp ? "Create an account to manage bookings, sync itineraries, and access live rates" : "Sign in to access your itinerary, real hotel/flight bookings, and AI Copilot"}
+          <p className="text-xs text-[#64748B] leading-relaxed pt-1">
+            {isSignUp
+              ? "Create an account to save custom itineraries, view real bookings, and access your 24x7 AI Copilot."
+              : "Sign in to access your planned routes, confirmed bookings, and personalized crowd alerts."}
           </p>
         </div>
 
-        {/* Error / Success Notifications */}
+        {/* Notifications */}
         {error && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold flex items-start gap-2 animate-fade-in">
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-200 text-rose-800 text-xs font-semibold flex items-start gap-2 animate-fade-in">
             <AlertCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
             <span>{error}</span>
           </div>
         )}
         {message && (
-          <div className="mb-5 p-3.5 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex items-start gap-2 animate-fade-in">
+          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-start gap-2 animate-fade-in">
             <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
             <span>{message}</span>
           </div>
         )}
 
-        {/* Auth Form */}
+        {/* Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-1.5">
-            <label className="block text-xs font-black text-slate-800">Email Address</label>
+            <label className="block text-xs font-semibold text-[#172536] uppercase tracking-wider">
+              Email Address
+            </label>
             <div className="relative">
               <input
                 type="email"
@@ -105,14 +115,16 @@ export default function Login({ onLoginSuccess }) {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@example.com"
                 required
-                className="w-full bg-slate-50 border-2 border-slate-200 focus:border-emerald-500 focus:bg-white rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold pl-10 transition outline-none"
+                className="w-full bg-[#FAF8F5] border border-[#E5E0D8] focus:border-[#172536] focus:bg-white rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold pl-10 transition outline-none"
               />
-              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <Mail className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
           </div>
 
           <div className="space-y-1.5">
-            <label className="block text-xs font-black text-slate-800">Password</label>
+            <label className="block text-xs font-semibold text-[#172536] uppercase tracking-wider">
+              Password
+            </label>
             <div className="relative">
               <input
                 type="password"
@@ -121,22 +133,22 @@ export default function Login({ onLoginSuccess }) {
                 placeholder="••••••••"
                 required
                 minLength={6}
-                className="w-full bg-slate-50 border-2 border-slate-200 focus:border-emerald-500 focus:bg-white rounded-2xl px-4 py-3 text-xs sm:text-sm font-semibold pl-10 transition outline-none"
+                className="w-full bg-[#FAF8F5] border border-[#E5E0D8] focus:border-[#172536] focus:bg-white rounded-xl px-3.5 py-2.5 text-xs sm:text-sm font-semibold pl-10 transition outline-none"
               />
-              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3.5" />
+              <Lock className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             </div>
           </div>
 
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-600/30 flex items-center justify-center gap-2 transition disabled:opacity-50"
+            className="w-full py-3.5 bg-[#E99A25] hover:bg-[#D4881A] text-[#172536] font-bold text-xs sm:text-sm rounded-xl shadow-md flex items-center justify-center gap-2 transition disabled:opacity-50 cursor-pointer"
           >
             {loading ? (
-              <span>Connecting to Supabase...</span>
+              <span>Authenticating...</span>
             ) : (
               <>
-                <span>{isSignUp ? "Create Yatri Account" : "Sign In to Dashboard"}</span>
+                <span>{isSignUp ? "Create Yatri Account" : "Sign In to Safar"}</span>
                 <ArrowRight className="w-4 h-4" />
               </>
             )}
@@ -144,27 +156,27 @@ export default function Login({ onLoginSuccess }) {
         </form>
 
         {/* Divider */}
-        <div className="relative my-6 text-center">
+        <div className="relative my-4 text-center">
           <div className="absolute inset-0 flex items-center">
-            <div className="w-full border-t border-slate-200" />
+            <div className="w-full border-t border-[#E5E0D8]" />
           </div>
-          <span className="relative px-3 bg-white text-[11px] font-bold text-slate-400 uppercase tracking-wider">
+          <span className="relative px-3 bg-white text-[11px] font-semibold text-[#94A3B8] uppercase tracking-wider">
             Or quick access
           </span>
         </div>
 
-        {/* Demo / Guest Login */}
+        {/* Guest Demo Login */}
         <button
           type="button"
           onClick={handleGuestLogin}
-          className="w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 font-black text-xs rounded-2xl border border-slate-200 flex items-center justify-center gap-2 transition shadow-xs"
+          className="w-full py-3 bg-[#FAF8F5] hover:bg-[#E5E0D8]/40 text-[#172536] font-bold text-xs rounded-xl border border-[#E5E0D8] flex items-center justify-center gap-2 transition cursor-pointer"
         >
-          <UserCheck className="w-4 h-4 text-emerald-600" />
+          <UserCheck className="w-4 h-4 text-[#2D5A46]" />
           <span>Continue as Guest / Demo Yatri (1-Click)</span>
         </button>
 
         {/* Switch mode */}
-        <div className="mt-6 text-center">
+        <div className="pt-2 text-center">
           <button
             type="button"
             onClick={() => {
@@ -172,15 +184,15 @@ export default function Login({ onLoginSuccess }) {
               setError("");
               setMessage("");
             }}
-            className="text-xs font-bold text-emerald-700 hover:text-emerald-800 hover:underline"
+            className="text-xs font-semibold text-[#2D5A46] hover:text-[#172536] hover:underline cursor-pointer"
           >
             {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Create one"}
           </button>
         </div>
 
         {/* Security badge */}
-        <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-center gap-1.5 text-[10px] text-slate-500 font-semibold">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
+        <div className="pt-4 border-t border-[#E5E0D8] flex items-center justify-center gap-1.5 text-[10px] text-[#64748B]">
+          <ShieldCheck className="w-3.5 h-3.5 text-[#2D5A46]" />
           <span>Secured by Supabase Auth & Cloud Data Store</span>
         </div>
       </div>

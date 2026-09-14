@@ -105,43 +105,43 @@ export default function BookingModal({ isOpen, onClose, item, type = "hotel", de
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Top Header */}
-        <div className="p-5 sm:p-6 bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 text-white flex items-center justify-between">
+        <div className="p-5 sm:p-6 bg-[#172536] text-white flex items-center justify-between border-b border-white/10">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center font-black text-xl">
-              {type === "flight" ? <Plane className="w-5 h-5 text-emerald-300" /> : <Building className="w-5 h-5 text-emerald-300" />}
+            <div className="w-10 h-10 rounded-xl bg-white/10 border border-white/15 flex items-center justify-center font-bold text-xl text-[#E99A25]">
+              {type === "flight" ? <Plane className="w-5 h-5 text-[#E99A25]" /> : <Building className="w-5 h-5 text-[#E99A25]" />}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500 text-slate-950">
-                  {step === 3 ? "Booking Confirmed" : "Real Booking & Checkout"}
+                <span className="text-[10px] font-sans font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-[#E99A25] text-[#172536]">
+                  {step === 3 ? "Booking Confirmed" : "Direct Reservation"}
                 </span>
-                <span className="text-[10px] text-teal-300 font-bold">Stripe Test Mode</span>
+                <span className="text-[10px] text-white/70 font-sans font-medium">Stripe Live Checkout</span>
               </div>
-              <h3 className="font-black text-lg sm:text-xl text-white mt-0.5 leading-tight">
+              <h3 className="font-serif font-bold text-lg sm:text-xl text-white mt-0.5 leading-tight">
                 {step === 3 ? "Official Booking Voucher" : `Reserve ${item.name || item.provider || "Travel"}`}
               </h3>
             </div>
           </div>
-          <button onClick={onClose} className="text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 text-xl font-bold">
+          <button onClick={onClose} className="text-white/70 hover:text-white p-2 rounded-xl hover:bg-white/10 text-xl font-bold transition">
             ✕
           </button>
         </div>
 
         {/* Progress Tracker Bar */}
         {step < 3 && (
-          <div className="px-6 py-2.5 bg-slate-100 border-b border-slate-200 flex items-center justify-between text-xs font-black">
-            <span className={step === 1 ? "text-emerald-700 flex items-center gap-1.5" : "text-slate-500 flex items-center gap-1.5"}>
-              <span className="w-5 h-5 rounded-full bg-emerald-600 text-white flex items-center justify-center text-[10px]">1</span>
+          <div className="px-6 py-2.5 bg-[#FAF8F5] border-b border-[#E5E0D8] flex items-center justify-between text-xs font-sans font-medium">
+            <span className={step === 1 ? "text-[#172536] font-semibold flex items-center gap-1.5" : "text-slate-500 flex items-center gap-1.5"}>
+              <span className="w-5 h-5 rounded-full bg-[#172536] text-white flex items-center justify-center text-[10px] font-bold">1</span>
               Traveler Details
             </span>
             <span className="text-slate-300">➔</span>
-            <span className={step === 2 ? "text-emerald-700 flex items-center gap-1.5" : "text-slate-400 flex items-center gap-1.5"}>
-              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? "bg-emerald-600 text-white" : "bg-slate-300 text-slate-700"}`}>2</span>
-              Stripe Test Payment
+            <span className={step === 2 ? "text-[#172536] font-semibold flex items-center gap-1.5" : "text-slate-400 flex items-center gap-1.5"}>
+              <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-bold ${step === 2 ? "bg-[#172536] text-white" : "bg-slate-200 text-slate-700"}`}>2</span>
+              Payment Confirmation
             </span>
             <span className="text-slate-300">➔</span>
             <span className="text-slate-400 flex items-center gap-1.5">
-              <span className="w-5 h-5 rounded-full bg-slate-300 text-slate-700 flex items-center justify-center text-[10px]">3</span>
+              <span className="w-5 h-5 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-[10px] font-bold">3</span>
               PNR Voucher
             </span>
           </div>
@@ -152,22 +152,22 @@ export default function BookingModal({ isOpen, onClose, item, type = "hotel", de
           {step === 1 && (
             <form onSubmit={handleProceedToPayment} className="space-y-4">
               {/* Selected Item Summary Card */}
-              <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-200 flex items-start justify-between gap-3">
+              <div className="p-4 rounded-2xl bg-[#FAF8F5] border border-[#E5E0D8] flex items-start justify-between gap-3">
                 <div>
-                  <span className="text-[10px] font-black uppercase text-emerald-800 bg-emerald-200/60 px-2 py-0.5 rounded">
+                  <span className="text-[10px] font-sans font-bold uppercase text-[#B47012] bg-[#E99A25]/15 px-2 py-0.5 rounded">
                     {item.type || type}
                   </span>
-                  <h4 className="font-black text-sm sm:text-base text-slate-900 mt-1">{item.name || item.provider || item.mode}</h4>
-                  <p className="text-xs text-slate-600 font-semibold">{item.address || item.route || `Destination: ${destination}`}</p>
-                  <p className="text-[11px] text-emerald-700 font-bold mt-1">
+                  <h4 className="font-serif font-bold text-sm sm:text-base text-[#172536] mt-1">{item.name || item.provider || item.mode}</h4>
+                  <p className="text-xs text-slate-500 font-sans">{item.address || item.route || `Destination: ${destination}`}</p>
+                  <p className="text-[11px] text-[#2D5A46] font-sans font-medium mt-1">
                     ✓ {item.cancellation || "Instant Confirmation with PNR & Supabase Sync"}
                   </p>
                 </div>
                 <div className="text-right shrink-0">
-                  <span className="text-sm sm:text-base font-black text-emerald-800 block">
+                  <span className="text-sm sm:text-base font-serif font-bold text-[#172536] block">
                     {item.price || `₹${totalPayable.toLocaleString()}`}
                   </span>
-                  <span className="text-[10px] text-slate-500 font-bold block">+ ₹{taxesAndGST} taxes</span>
+                  <span className="text-[10px] text-slate-400 font-sans block">+ ₹{taxesAndGST} taxes</span>
                 </div>
               </div>
 
@@ -392,14 +392,14 @@ export default function BookingModal({ isOpen, onClose, item, type = "hotel", de
                 <button
                   type="submit"
                   disabled={loading}
-                  className="px-7 py-3 rounded-2xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-black text-xs sm:text-sm flex items-center gap-2 shadow-xl shadow-emerald-600/30 transition disabled:opacity-50"
+                  className="px-6 py-3 rounded-xl bg-[#172536] hover:bg-[#22354d] text-[#F7F5F0] font-sans font-semibold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition disabled:opacity-50"
                 >
                   {loading ? (
                     <span>Processing with Stripe & Syncing Supabase...</span>
                   ) : (
                     <>
-                      <Lock className="w-4 h-4" />
-                      <span>Authorize Payment of ₹{totalPayable.toLocaleString()}</span>
+                      <Lock className="w-4 h-4 text-[#E99A25]" />
+                      <span>Confirm & Authorize ₹{totalPayable.toLocaleString()}</span>
                     </>
                   )}
                 </button>
@@ -411,34 +411,34 @@ export default function BookingModal({ isOpen, onClose, item, type = "hotel", de
           {step === 3 && confirmedBooking && (
             <div className="space-y-5">
               {/* Green Success Badge */}
-              <div className="p-4 rounded-2xl bg-emerald-50 border-2 border-emerald-300 text-emerald-950 flex items-center justify-between shadow-sm">
+              <div className="p-4 rounded-2xl bg-[#2D5A46]/10 border border-[#2D5A46]/30 text-[#2D5A46] flex items-center justify-between shadow-xs">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-black">
-                    <Check className="w-6 h-6" />
+                  <div className="w-10 h-10 rounded-xl bg-[#2D5A46] text-white flex items-center justify-center font-bold">
+                    <Check className="w-5 h-5" />
                   </div>
                   <div>
-                    <h4 className="font-black text-sm sm:text-base text-emerald-950">Payment Successful & Booking Confirmed!</h4>
-                    <p className="text-xs text-emerald-800 font-semibold">
-                      Your booking has been registered on <strong>Supabase</strong> with official PNR.
+                    <h4 className="font-serif font-bold text-sm sm:text-base text-[#172536]">Payment Confirmed & Verified</h4>
+                    <p className="text-xs text-slate-600 font-sans">
+                      Your booking has been registered with official PNR.
                     </p>
                   </div>
                 </div>
-                <span className="text-xs font-black uppercase text-emerald-800 bg-emerald-200 px-2.5 py-1 rounded-lg">
+                <span className="text-xs font-sans font-bold uppercase text-[#2D5A46] bg-white border border-[#2D5A46]/30 px-2.5 py-1 rounded-md">
                   PAID
                 </span>
               </div>
 
               {/* Printable Official Voucher Box */}
-              <div id="booking-voucher" className="p-6 rounded-3xl bg-white border-2 border-slate-300 shadow-xl space-y-5 text-slate-900">
+              <div id="booking-voucher" className="p-6 rounded-3xl bg-white border border-[#E5E0D8] shadow-sm space-y-5 text-slate-900">
                 {/* Voucher Top Header */}
-                <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-dashed border-slate-200 pb-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b-2 border-dashed border-[#E5E0D8] pb-4">
                   <div className="flex items-center gap-2.5">
-                    <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-black text-xl">
-                      🧭
+                    <div className="w-10 h-10 rounded-xl bg-[#172536] text-[#F7F5F0] flex items-center justify-center font-serif font-bold text-lg">
+                      S
                     </div>
                     <div>
-                      <h3 className="font-black text-base text-slate-900">YatriSathi Official Travel Voucher</h3>
-                      <p className="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Government Recognized Tourism Partner</p>
+                      <h3 className="font-serif font-bold text-base text-[#172536]">SAFAR Official Travel Voucher</h3>
+                      <p className="text-[10px] text-slate-500 font-sans font-medium uppercase tracking-wider">Verified Booking & Tourism Guarantee</p>
                     </div>
                   </div>
 

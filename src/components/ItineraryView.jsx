@@ -69,19 +69,20 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
 
   if (!activePlan || !activePlan.days || activePlan.days.length === 0) {
     return (
-      <div className="max-w-4xl mx-auto p-8 text-center bg-white rounded-3xl border-2 border-slate-200 shadow-xl my-8">
-        <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-3xl mx-auto flex items-center justify-center text-3xl font-black mb-4">
+      <div className="max-w-4xl mx-auto p-10 text-center bg-white rounded-3xl border border-[#E5E0D8] shadow-sm my-12">
+        <div className="w-16 h-16 bg-[#172536]/5 text-[#172536] rounded-2xl mx-auto flex items-center justify-center text-3xl mb-5">
           🧭
         </div>
-        <h2 className="text-2xl font-black text-slate-900 mb-2">No Active Itinerary Found</h2>
-        <p className="text-slate-600 font-semibold mb-6">
-          Head over to "Plan Yatra" to set your destination, budget, and travel preferences to generate a personalized AI itinerary.
+        <h2 className="text-2xl sm:text-3xl font-serif font-bold text-[#172536] mb-3">No Active Itinerary Found</h2>
+        <p className="text-slate-600 font-sans text-sm sm:text-base max-w-md mx-auto mb-8 leading-relaxed">
+          Begin your journey in Plan Yatra to select your destination, budget, and travel preferences for an authentic, curated itinerary.
         </p>
         <button
           onClick={onRegenerate}
-          className="px-6 py-3 rounded-2xl bg-emerald-600 text-white font-black hover:bg-emerald-700 shadow-lg transition"
+          className="px-6 py-3.5 rounded-xl bg-[#172536] hover:bg-[#22354d] text-[#F7F5F0] font-sans font-semibold text-sm shadow-sm transition inline-flex items-center gap-2"
         >
-          Go to Plan Yatra →
+          <span>Go to Plan Yatra</span>
+          <ArrowRight className="w-4 h-4 text-[#E99A25]" />
         </button>
       </div>
     );
@@ -525,23 +526,23 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
   }
 
   const renderTravelAndStaySelection = (isAtTop = false) => (
-    <div className={`rounded-3xl border-2 p-6 sm:p-8 space-y-6 shadow-xl ${isAtTop
-        ? "bg-gradient-to-br from-blue-50/70 via-white to-amber-50/70 border-blue-300 ring-2 ring-blue-400/20 animate-fade-in"
-        : "bg-white border-slate-200"
+    <div className={`rounded-3xl border p-6 sm:p-8 space-y-6 shadow-sm ${isAtTop
+        ? "bg-white border-[#E5E0D8] animate-fade-in"
+        : "bg-white border-[#E5E0D8]"
       }`}>
-      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-200/80 pb-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E5E0D8] pb-5">
         <div>
           <div className="flex items-center gap-2">
             <span className="text-xl">✈️🏨</span>
-            <span className="text-xs font-black uppercase tracking-wider text-blue-700 bg-blue-100 px-2.5 py-0.5 rounded-full">
-              {isAtTop ? "Step 2: Choose Travel & Stay Preferences" : "Real Booking & Multimodal Switcher"}
+            <span className="text-[11px] font-sans font-semibold uppercase tracking-wider text-[#172536] bg-[#172536]/5 border border-[#172536]/15 px-2.5 py-0.5 rounded-full">
+              {isAtTop ? "Step 2: Travel & Accommodations" : "Bookings & Transport Options"}
             </span>
           </div>
-          <h2 className="text-xl sm:text-2xl font-black text-slate-900 mt-1">
-            {isAtTop ? `Select Your Travel & Stay for ${dest.name}` : "Live Booking & Options Directory"}
+          <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#172536] mt-1.5">
+            {isAtTop ? `Select Travel & Stay for ${dest.name}` : "Live Booking & Options Directory"}
           </h2>
-          <p className="text-xs text-slate-600 font-semibold mt-0.5">
-            Choose from curated AI recommendations or search live verified real hotels & flights with instant Stripe checkout & PNR voucher.
+          <p className="text-xs sm:text-sm text-slate-600 font-sans mt-0.5">
+            Choose curated options or search verified real hotels & flights with instant booking vouchers.
           </p>
         </div>
 
@@ -549,10 +550,10 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
           <button
             type="button"
             onClick={handleFinalizeItinerary}
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-sm sm:text-base shadow-xl shadow-emerald-600/30 flex items-center gap-2 transition"
+            className="px-5 py-3 rounded-xl bg-[#172536] hover:bg-[#22354d] text-[#F7F5F0] font-sans font-semibold text-sm shadow-sm flex items-center gap-2 transition"
           >
-            <Sparkles className="w-4 h-4" />
-            <span>Generate Final Itinerary</span>
+            <Sparkles className="w-4 h-4 text-[#E99A25]" />
+            <span>Generate Detailed Itinerary</span>
             <ArrowRight className="w-4 h-4" />
           </button>
         )}
@@ -563,10 +564,10 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
         <div className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-sm">
+              <div className="w-7 h-7 rounded-lg bg-[#172536] text-[#F7F5F0] flex items-center justify-center font-bold text-xs">
                 ✈️
               </div>
-              <h3 className="font-black text-slate-900 text-base">Travel & Transit</h3>
+              <h3 className="font-serif font-bold text-[#172536] text-base">Travel & Transit</h3>
             </div>
 
             {/* Travel Mode Sub-tabs */}
@@ -795,22 +796,22 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
       {!isFinalized && renderTravelAndStaySelection(true)}
 
       {/* Header Banner */}
-      <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-slate-200 bg-slate-900 text-white">
+      <div className="relative rounded-3xl overflow-hidden shadow-xl border border-[#E5E0D8]/30 bg-[#172536] text-white">
         <div
-          className="absolute inset-0 bg-cover bg-center opacity-40 mix-blend-overlay"
+          className="absolute inset-0 bg-cover bg-center opacity-30 mix-blend-luminosity"
           style={{ backgroundImage: `url(${dest.image})` }}
         />
-        <div className="relative p-6 sm:p-10 space-y-4">
+        <div className="relative p-6 sm:p-10 space-y-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex flex-wrap items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-500 text-slate-950 font-black text-xs uppercase tracking-wider">
-                {isFinalized ? "Final Itinerary" : "Draft Plan Preview"}
+              <span className="px-3 py-1 rounded-full bg-[#E99A25] text-[#172536] font-sans font-semibold text-xs uppercase tracking-wider">
+                {isFinalized ? "Confirmed Circuit" : "Draft Itinerary"}
               </span>
-              <span className="px-3 py-1 rounded-full bg-white/20 text-white font-bold text-xs">
+              <span className="px-3 py-1 rounded-full bg-white/10 text-white/90 border border-white/15 font-sans font-medium text-xs">
                 {dest.category} Circuit
               </span>
-              <span className="px-3 py-1 rounded-full bg-blue-500/30 text-blue-200 border border-blue-400/30 font-bold text-xs flex items-center gap-1">
-                <CheckCircle2 className="w-3 h-3 text-emerald-400" /> Editable & Cloud-Synced
+              <span className="px-3 py-1 rounded-full bg-white/10 text-white/80 border border-white/15 font-sans font-medium text-xs flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-[#E99A25]" /> Interactive Route
               </span>
             </div>
 
@@ -818,21 +819,21 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
               {onResetItinerary && (
                 <button
                   onClick={handleResetToAI}
-                  title="Reset custom modifications to AI baseline"
-                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 font-black text-xs flex items-center gap-1.5 backdrop-blur-sm transition"
+                  title="Reset custom modifications to baseline"
+                  className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white/90 font-sans font-medium text-xs flex items-center gap-1.5 backdrop-blur-sm transition border border-white/10"
                 >
-                  <RotateCcw className="w-3.5 h-3.5" /> Reset to AI
+                  <RotateCcw className="w-3.5 h-3.5" /> Reset
                 </button>
               )}
               <button
                 onClick={handlePrint}
-                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-black text-xs flex items-center gap-1.5 backdrop-blur-sm transition"
+                className="px-3.5 py-2 rounded-xl bg-white/10 hover:bg-white/20 text-white font-sans font-medium text-xs flex items-center gap-1.5 backdrop-blur-sm transition border border-white/10"
               >
-                <Download className="w-3.5 h-3.5" /> Export Plan
+                <Download className="w-3.5 h-3.5" /> Export PDF
               </button>
               <button
                 onClick={onOpenSOS}
-                className="px-4 py-2 rounded-xl bg-rose-600 hover:bg-rose-500 text-white font-black text-xs flex items-center gap-1.5 shadow-lg transition"
+                className="px-3.5 py-2 rounded-xl bg-rose-700/80 hover:bg-rose-700 text-white font-sans font-medium text-xs flex items-center gap-1.5 transition"
               >
                 <ShieldAlert className="w-3.5 h-3.5" /> Emergency SOS
               </button>
@@ -840,27 +841,27 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
           </div>
 
           <div>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight">{dest.name} Yatra</h1>
-            <p className="text-sm sm:text-lg text-emerald-200 font-semibold mt-1">{dest.tagline}</p>
+            <h1 className="text-3xl sm:text-5xl font-serif font-bold tracking-tight">{dest.name} Journey</h1>
+            <p className="text-sm sm:text-base text-[#F7F5F0]/80 font-sans mt-1.5 max-w-2xl">{dest.tagline}</p>
           </div>
 
           {/* Quick Metrics Bar */}
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-white/15 text-xs">
-            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
-              <span className="text-white/70 block">Total Duration</span>
-              <span className="font-black text-base text-white">{activePlan.days.length} Days</span>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-3 border-t border-white/10 text-xs">
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <span className="text-white/60 font-sans block text-[11px]">Duration</span>
+              <span className="font-serif font-bold text-base text-white mt-0.5 block">{activePlan.days.length} Days</span>
             </div>
-            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
-              <span className="text-white/70 block">Budget per Person</span>
-              <span className="font-black text-base text-emerald-300">₹{activePlan.budgetPerPerson?.toLocaleString() || "N/A"}</span>
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <span className="text-white/60 font-sans block text-[11px]">Est. Budget / Person</span>
+              <span className="font-serif font-bold text-base text-[#E99A25] mt-0.5 block">₹{activePlan.budgetPerPerson?.toLocaleString() || "N/A"}</span>
             </div>
-            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
-              <span className="text-white/70 block">Departure Timing</span>
-              <span className="font-black text-base text-white">{currentSelectedTravel?.departureTime || activePlan.departTime || "08:00 AM"}</span>
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <span className="text-white/60 font-sans block text-[11px]">Departure Time</span>
+              <span className="font-sans font-semibold text-sm text-white mt-0.5 block">{currentSelectedTravel?.departureTime || activePlan.departTime || "08:00 AM"}</span>
             </div>
-            <div className="p-3 rounded-2xl bg-white/10 backdrop-blur-md">
-              <span className="text-white/70 block">Travel Party</span>
-              <span className="font-black text-base text-amber-300 capitalize">{activePlan.travelType} ({activePlan.groupSize} {activePlan.groupSize === 1 ? "Person" : "People"})</span>
+            <div className="p-3.5 rounded-2xl bg-white/5 border border-white/10 backdrop-blur-sm">
+              <span className="text-white/60 font-sans block text-[11px]">Party</span>
+              <span className="font-sans font-semibold text-sm text-white capitalize mt-0.5 block">{activePlan.travelType} ({activePlan.groupSize} {activePlan.groupSize === 1 ? "Person" : "People"})</span>
             </div>
           </div>
         </div>
@@ -869,73 +870,75 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
       {/* 🎯 CONFIRMED SELECTIONS SUMMARY BAR */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Selected Travel Card */}
-        <div className="p-5 rounded-3xl bg-blue-50 border-2 border-blue-300 shadow-sm space-y-2 relative">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E0D8] shadow-xs space-y-2.5 relative hover:border-slate-300 transition">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span className="text-xl">✈️</span>
               <div>
-                <span className="text-[10px] font-black uppercase text-blue-800 bg-blue-200 px-2 py-0.5 rounded-md">
-                  Confirmed Travel Choice
+                <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-[#172536] bg-[#172536]/10 px-2 py-0.5 rounded">
+                  Outbound Travel
                 </span>
-                <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedTravel.provider || currentSelectedTravel.mode}</h4>
+                <h4 className="font-serif font-bold text-base text-[#172536] mt-1">{currentSelectedTravel.provider || currentSelectedTravel.mode}</h4>
               </div>
             </div>
             <div className="text-right">
-              <span className="font-black text-sm text-emerald-800 bg-white border border-blue-200 px-2.5 py-1 rounded-xl shadow-sm block">
+              <span className="font-serif font-bold text-sm text-[#172536] bg-[#F7F5F0] border border-[#E5E0D8] px-2.5 py-1 rounded-lg block">
                 {currentSelectedTravel.price}
               </span>
             </div>
           </div>
-          <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
-            <p className="text-slate-900 font-bold">Route: {currentSelectedTravel.route}</p>
-            <p className="text-slate-600">Schedule: {currentSelectedTravel.timing || currentSelectedTravel.departureTime} • {currentSelectedTravel.duration}</p>
-            <p className="text-slate-500 text-[11px]">{currentSelectedTravel.cabinClass || currentSelectedTravel.stops}</p>
+          <div className="text-xs text-slate-700 font-sans space-y-0.5 pt-1">
+            <p className="font-medium text-slate-900">Route: {currentSelectedTravel.route}</p>
+            <p className="text-slate-500">Schedule: {currentSelectedTravel.timing || currentSelectedTravel.departureTime} • {currentSelectedTravel.duration}</p>
+            <p className="text-slate-400 text-[11px]">{currentSelectedTravel.cabinClass || currentSelectedTravel.stops}</p>
           </div>
-          <div className="pt-2 flex items-center justify-between">
-            <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Integrated in Day 1 Departure
+          <div className="pt-2 flex items-center justify-between border-t border-[#E5E0D8]/60">
+            <span className="text-[11px] font-sans font-medium text-[#2D5A46] flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Day 1 Outbound Route
             </span>
             <button
               type="button"
               onClick={() => handleOpenBookingModal(currentSelectedTravel, "flight")}
-              className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] flex items-center gap-1 shadow-xs transition"
+              className="px-3.5 py-1.5 rounded-lg bg-[#172536] hover:bg-[#22354d] text-white font-sans font-medium text-xs flex items-center gap-1.5 shadow-xs transition"
             >
-              <CreditCard className="w-3 h-3 text-emerald-400" /> Book Real Ticket
+              <CreditCard className="w-3 h-3 text-[#E99A25]" />
+              <span>Book Ticket</span>
             </button>
           </div>
         </div>
 
         {/* Selected Stay Card */}
-        <div className="p-5 rounded-3xl bg-amber-50 border-2 border-amber-300 shadow-sm space-y-2 relative">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E0D8] shadow-xs space-y-2.5 relative hover:border-slate-300 transition">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span className="text-xl">🏨</span>
               <div>
-                <span className="text-[10px] font-black uppercase text-amber-800 bg-amber-200 px-2 py-0.5 rounded-md">
-                  Confirmed Accommodation
+                <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-[#B47012] bg-[#E99A25]/15 px-2 py-0.5 rounded">
+                  Accommodation
                 </span>
-                <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedStay.name}</h4>
+                <h4 className="font-serif font-bold text-base text-[#172536] mt-1">{currentSelectedStay.name}</h4>
               </div>
             </div>
-            <span className="text-xs font-black text-amber-900 bg-white border border-amber-200 px-2.5 py-1 rounded-xl shadow-sm">
-              ⭐ {currentSelectedStay.rating}
+            <span className="text-xs font-sans font-bold text-[#B47012] bg-[#F7F5F0] border border-[#E5E0D8] px-2.5 py-1 rounded-lg">
+              ★ {currentSelectedStay.rating}
             </span>
           </div>
-          <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
-            <p className="text-emerald-800 font-bold">Price: {currentSelectedStay.price}</p>
-            <p className="text-slate-600 text-[11px] line-clamp-1">{currentSelectedStay.description || currentSelectedStay.address}</p>
-            <p className="text-slate-500 text-[10px]">Tier: {currentSelectedStay.type}</p>
+          <div className="text-xs text-slate-700 font-sans space-y-0.5 pt-1">
+            <p className="font-medium text-[#2D5A46]">Price: {currentSelectedStay.price}</p>
+            <p className="text-slate-500 text-[11px] line-clamp-1">{currentSelectedStay.description || currentSelectedStay.address}</p>
+            <p className="text-slate-400 text-[10px]">Tier: {currentSelectedStay.type}</p>
           </div>
-          <div className="pt-2 flex items-center justify-between">
-            <span className="text-[10px] font-black text-emerald-800 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" /> Integrated in Day 1 Check-in
+          <div className="pt-2 flex items-center justify-between border-t border-[#E5E0D8]/60">
+            <span className="text-[11px] font-sans font-medium text-[#2D5A46] flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Day 1 Check-in Confirmed
             </span>
             <button
               type="button"
               onClick={() => handleOpenBookingModal(currentSelectedStay, "hotel")}
-              className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] flex items-center gap-1 shadow-xs transition"
+              className="px-3.5 py-1.5 rounded-lg bg-[#172536] hover:bg-[#22354d] text-white font-sans font-medium text-xs flex items-center gap-1.5 shadow-xs transition"
             >
-              <CreditCard className="w-3 h-3 text-emerald-400" /> Book Real Room
+              <CreditCard className="w-3 h-3 text-[#E99A25]" />
+              <span>Book Room</span>
             </button>
           </div>
         </div>
@@ -943,38 +946,39 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
 
       {/* Confirmed Return Travel Card */}
       {currentSelectedReturnTravel && (
-        <div className="p-5 rounded-3xl bg-purple-50 border-2 border-purple-300 shadow-sm space-y-2 relative">
+        <div className="p-5 rounded-2xl bg-white border border-[#E5E0D8] shadow-xs space-y-2.5 relative hover:border-slate-300 transition">
           <div className="flex items-start justify-between gap-2">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2.5">
               <span className="text-xl">🔙</span>
               <div>
-                <span className="text-[10px] font-black uppercase text-purple-800 bg-purple-200 px-2 py-0.5 rounded-md">
-                  Confirmed Return Travel
+                <span className="text-[10px] font-sans font-bold uppercase tracking-wider text-[#172536] bg-[#172536]/10 px-2 py-0.5 rounded">
+                  Return Transit
                 </span>
-                <h4 className="font-black text-base text-slate-900 mt-0.5">{currentSelectedReturnTravel.provider || currentSelectedReturnTravel.mode}</h4>
+                <h4 className="font-serif font-bold text-base text-[#172536] mt-1">{currentSelectedReturnTravel.provider || currentSelectedReturnTravel.mode}</h4>
               </div>
             </div>
             <div className="text-right">
-              <span className="font-black text-sm text-emerald-800 bg-white border border-purple-200 px-2.5 py-1 rounded-xl shadow-sm block">
+              <span className="font-serif font-bold text-sm text-[#172536] bg-[#F7F5F0] border border-[#E5E0D8] px-2.5 py-1 rounded-lg block">
                 {currentSelectedReturnTravel.price}
               </span>
             </div>
           </div>
-          <div className="text-xs text-slate-700 font-semibold space-y-0.5 pt-1">
-            <p className="text-slate-900 font-bold">Route: {currentSelectedReturnTravel.route}</p>
-            <p className="text-slate-600">Schedule: {currentSelectedReturnTravel.timing || currentSelectedReturnTravel.departureTime} • {currentSelectedReturnTravel.duration}</p>
-            <p className="text-slate-500 text-[11px]">{currentSelectedReturnTravel.cabinClass || currentSelectedReturnTravel.stops}</p>
+          <div className="text-xs text-slate-700 font-sans space-y-0.5 pt-1">
+            <p className="font-medium text-slate-900">Route: {currentSelectedReturnTravel.route}</p>
+            <p className="text-slate-500">Schedule: {currentSelectedReturnTravel.timing || currentSelectedReturnTravel.departureTime} • {currentSelectedReturnTravel.duration}</p>
+            <p className="text-slate-400 text-[11px]">{currentSelectedReturnTravel.cabinClass || currentSelectedReturnTravel.stops}</p>
           </div>
-          <div className="pt-2 flex items-center justify-between">
-            <span className="text-[10px] font-black text-purple-800 flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5 text-purple-600" /> Integrated in Day {activePlan.duration || activePlan.days.length} Departure
+          <div className="pt-2 flex items-center justify-between border-t border-[#E5E0D8]/60">
+            <span className="text-[11px] font-sans font-medium text-[#2D5A46] flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Day {activePlan.duration || activePlan.days.length} Return Route
             </span>
             <button
               type="button"
               onClick={() => handleOpenBookingModal(currentSelectedReturnTravel, "flight")}
-              className="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-black text-[10px] flex items-center gap-1 shadow-xs transition"
+              className="px-3.5 py-1.5 rounded-lg bg-[#172536] hover:bg-[#22354d] text-white font-sans font-medium text-xs flex items-center gap-1.5 shadow-xs transition"
             >
-              🎫 Book Return Ticket
+              <CreditCard className="w-3 h-3 text-[#E99A25]" />
+              <span>Book Return Ticket</span>
             </button>
           </div>
         </div>
@@ -1038,14 +1042,14 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                 setSelectedDayIndex(idx);
                 setIsEditingDayTitle(false);
               }}
-              className={`px-4 sm:px-5 py-3 rounded-2xl font-black text-xs sm:text-sm shrink-0 transition-all flex items-center gap-2 ${safeDayIndex === idx
-                  ? "bg-slate-900 text-white shadow-xl shadow-slate-900/20 scale-105"
-                  : "bg-white text-slate-700 border-2 border-slate-200 hover:border-slate-300"
+              className={`px-4 sm:px-5 py-2.5 rounded-xl font-sans text-xs sm:text-sm shrink-0 transition-all flex items-center gap-2 ${safeDayIndex === idx
+                  ? "bg-[#172536] text-white shadow-sm font-semibold"
+                  : "bg-white text-slate-700 border border-[#E5E0D8] hover:border-slate-300 font-medium"
                 }`}
             >
-              <Calendar className="w-4 h-4 text-emerald-500" />
+              <Calendar className="w-3.5 h-3.5 text-[#E99A25]" />
               <span>Day {day.dayNumber}</span>
-              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${safeDayIndex === idx ? "bg-white/20 text-white" : "bg-slate-100 text-slate-600"
+              <span className={`text-[10px] px-1.5 py-0.5 rounded-full ${safeDayIndex === idx ? "bg-white/15 text-white" : "bg-slate-100 text-slate-600"
                 }`}>
                 {day.activities?.length || 0}
               </span>
@@ -1055,25 +1059,25 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
           {/* Add Day Button */}
           <button
             onClick={handleAddDay}
-            className="px-4 py-3 rounded-2xl font-black text-xs sm:text-sm shrink-0 bg-emerald-50 text-emerald-800 border-2 border-dashed border-emerald-400 hover:bg-emerald-100 transition flex items-center gap-1.5"
+            className="px-4 py-2.5 rounded-xl font-sans font-medium text-xs sm:text-sm shrink-0 bg-[#172536]/5 text-[#172536] border border-dashed border-[#172536]/30 hover:bg-[#172536]/10 transition flex items-center gap-1.5"
             title="Add a new day to the itinerary"
           >
-            <Plus className="w-4 h-4 text-emerald-600" />
+            <Plus className="w-4 h-4 text-[#172536]" />
             <span>Add Day</span>
           </button>
         </div>
       </div>
 
       {/* CURRENT DAY SCHEDULE & ACTIVITIES */}
-      <div className="bg-white rounded-3xl border-2 border-slate-200 p-6 sm:p-8 shadow-xl space-y-6">
+      <div className="bg-white rounded-3xl border border-[#E5E0D8] p-6 sm:p-8 shadow-xs space-y-6">
         {/* Day Header with Edit Title, Day Reordering, Delete Day, and Add Activity */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-5">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-[#E5E0D8] pb-5">
           <div className="space-y-1 flex-1">
             <div className="flex items-center gap-2">
-              <span className="text-xs font-black uppercase tracking-wider text-emerald-600">
+              <span className="text-[11px] font-sans font-bold uppercase tracking-wider text-[#B47012]">
                 Day {currentDay.dayNumber} Schedule
               </span>
-              <span className="text-[10px] font-bold text-slate-500 bg-slate-100 px-2.5 py-0.5 rounded-full">
+              <span className="text-[10px] font-sans font-medium text-slate-500 bg-[#F7F5F0] border border-[#E5E0D8] px-2 py-0.5 rounded-full">
                 {currentDay.activities.length} {currentDay.activities.length === 1 ? "Activity" : "Activities"}
               </span>
             </div>
@@ -1085,20 +1089,20 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                   type="text"
                   value={dayTitleInput}
                   onChange={(e) => setDayTitleInput(e.target.value)}
-                  className="px-3 py-1.5 text-lg font-black text-slate-900 border-2 border-emerald-500 rounded-xl focus:outline-none w-full max-w-lg shadow-sm"
+                  className="px-3 py-1.5 text-lg font-serif font-bold text-[#172536] border-2 border-[#172536] rounded-xl focus:outline-none w-full max-w-lg shadow-sm"
                   autoFocus
                 />
                 <button
                   type="submit"
-                  className="p-2 rounded-xl bg-emerald-600 text-white font-black hover:bg-emerald-700 transition shrink-0"
+                  className="p-2 rounded-xl bg-[#172536] text-white font-bold hover:bg-[#22354d] transition shrink-0"
                   title="Save Title"
                 >
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 text-[#E99A25]" />
                 </button>
                 <button
                   type="button"
                   onClick={() => setIsEditingDayTitle(false)}
-                  className="p-2 rounded-xl bg-slate-200 text-slate-700 font-black hover:bg-slate-300 transition shrink-0"
+                  className="p-2 rounded-xl bg-slate-100 text-slate-700 font-bold hover:bg-slate-200 transition shrink-0"
                   title="Cancel"
                 >
                   <X className="w-4 h-4" />
@@ -1106,7 +1110,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
               </form>
             ) : (
               <div className="flex items-center gap-2 group">
-                <h2 className="text-xl sm:text-2xl font-black text-slate-900">{currentDay.title}</h2>
+                <h2 className="text-xl sm:text-2xl font-serif font-bold text-[#172536]">{currentDay.title}</h2>
                 <button
                   onClick={handleStartEditDayTitle}
                   className="opacity-60 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition"
@@ -1121,11 +1125,11 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
           {/* Action Toolbar for the Day */}
           <div className="flex flex-wrap items-center gap-2 shrink-0">
             {/* Day Reorder Buttons */}
-            <div className="flex items-center bg-slate-100 rounded-xl p-1 gap-1">
+            <div className="flex items-center bg-[#F7F5F0] border border-[#E5E0D8] rounded-xl p-1 gap-1">
               <button
                 onClick={() => handleMoveDay(-1)}
                 disabled={safeDayIndex === 0}
-                className="px-2 py-1 rounded-lg text-xs font-black text-slate-700 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1"
+                className="px-2.5 py-1 rounded-lg text-xs font-sans font-medium text-slate-700 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1"
                 title="Move Day Earlier"
               >
                 <ArrowUp className="w-3.5 h-3.5 -rotate-90" />
@@ -1134,7 +1138,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
               <button
                 onClick={() => handleMoveDay(1)}
                 disabled={safeDayIndex === activePlan.days.length - 1}
-                className="px-2 py-1 rounded-lg text-xs font-black text-slate-700 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1"
+                className="px-2.5 py-1 rounded-lg text-xs font-sans font-medium text-slate-700 hover:bg-white disabled:opacity-30 disabled:cursor-not-allowed transition flex items-center gap-1"
                 title="Move Day Later"
               >
                 <span className="hidden sm:inline">Move Right</span>
@@ -1146,7 +1150,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
             {activePlan.days.length > 1 && (
               <button
                 onClick={handleDeleteDay}
-                className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-black text-xs flex items-center gap-1 transition"
+                className="px-3 py-1.5 rounded-xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-sans font-medium text-xs flex items-center gap-1 transition"
                 title="Delete this entire day"
               >
                 <Trash2 className="w-3.5 h-3.5" />
@@ -1157,9 +1161,9 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
             {/* Add Activity Button */}
             <button
               onClick={handleOpenAddActivity}
-              className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs flex items-center gap-1.5 shadow-md shadow-emerald-600/20 transition"
+              className="px-4 py-2 rounded-xl bg-[#172536] hover:bg-[#22354d] text-white font-sans font-medium text-xs flex items-center gap-1.5 shadow-xs transition"
             >
-              <Plus className="w-3.5 h-3.5" />
+              <Plus className="w-3.5 h-3.5 text-[#E99A25]" />
               <span>Add Activity</span>
             </button>
           </div>
@@ -1201,15 +1205,15 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                   onDragOver={(e) => handleDragOver(e, actIdx)}
                   onDrop={(e) => handleDrop(e, actIdx)}
                   onDragEnd={handleDragEnd}
-                  className={`p-5 sm:p-6 rounded-2xl border-2 transition-all relative group ${isBeingDragged
+                  className={`p-5 sm:p-6 rounded-2xl border transition-all relative group ${isBeingDragged
                       ? "opacity-40 border-dashed border-slate-400 scale-[0.99]"
                       : isDragTarget
-                        ? "border-emerald-500 bg-emerald-50/50 shadow-md scale-[1.01]"
+                        ? "border-[#172536] bg-[#172536]/5 shadow-sm scale-[1.01]"
                         : act.isSwapped
-                          ? "bg-teal-50/50 border-teal-300 shadow-md"
+                          ? "bg-[#2D5A46]/5 border-[#2D5A46]/30 shadow-xs"
                           : isCrowded
-                            ? "bg-rose-50/30 border-rose-200"
-                            : "bg-slate-50/60 border-slate-200 hover:border-slate-300"
+                            ? "bg-rose-50/40 border-rose-200"
+                            : "bg-[#FAF8F5] border-[#E5E0D8] hover:border-slate-300 shadow-xs"
                     }`}
                 >
                   {/* Top Bar: Drag Handle, Slot, Category, Actions */}
@@ -1223,24 +1227,24 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                         <GripVertical className="w-4 h-4" />
                       </div>
 
-                      <span className="px-3 py-1 rounded-xl bg-slate-900 text-white font-black text-xs">
+                      <span className="px-3 py-1 rounded-lg bg-[#172536] text-[#F7F5F0] font-sans font-medium text-xs">
                         {act.slot}
                       </span>
-                      <span className="text-xs font-bold text-slate-600 bg-white border border-slate-200 px-2.5 py-1 rounded-lg">
+                      <span className="text-xs font-sans font-medium text-slate-600 bg-white border border-[#E5E0D8] px-2.5 py-1 rounded-lg">
                         {act.type}
                       </span>
                       {act.isSwapped && (
-                        <span className="text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-emerald-600 text-white">
-                          Offbeat Gem
+                        <span className="text-[10px] font-sans font-bold uppercase px-2.5 py-0.5 rounded-full bg-[#2D5A46] text-white">
+                          Alternative Gem
                         </span>
                       )}
                     </div>
 
                     <div className="flex items-center gap-2 flex-wrap">
                       {/* Crowd Meter Badge */}
-                      <div className="flex items-center gap-2 text-xs font-black">
+                      <div className="flex items-center gap-1.5 text-xs font-sans font-medium">
                         <span className="text-slate-500">Live Crowd:</span>
-                        <span className={`px-2.5 py-1 rounded-lg ${act.crowdScore > 80 ? "bg-rose-100 text-rose-800" : act.crowdScore > 50 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-emerald-800"
+                        <span className={`px-2 py-0.5 rounded-md font-semibold text-[11px] ${act.crowdScore > 80 ? "bg-rose-100 text-rose-800" : act.crowdScore > 50 ? "bg-amber-100 text-amber-800" : "bg-emerald-100 text-[#2D5A46]"
                           }`}>
                           {act.crowdScore}% ({act.crowdLevel})
                         </span>
@@ -1250,7 +1254,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                       <button
                         type="button"
                         onClick={() => handleStartEditActivity(safeDayIndex, actIdx, act)}
-                        className="p-1.5 rounded-lg bg-white border border-slate-200 text-slate-700 hover:bg-emerald-50 hover:text-emerald-700 hover:border-emerald-300 shadow-xs transition"
+                        className="p-1.5 rounded-lg bg-white border border-[#E5E0D8] text-slate-700 hover:bg-[#172536]/5 hover:text-[#172536] shadow-xs transition"
                         title="Edit Activity"
                       >
                         <Edit3 className="w-3.5 h-3.5" />
@@ -1260,7 +1264,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                       <button
                         type="button"
                         onClick={() => handleDeleteActivity(safeDayIndex, actIdx)}
-                        className="p-1.5 rounded-lg bg-white border border-slate-200 text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-xs transition"
+                        className="p-1.5 rounded-lg bg-white border border-[#E5E0D8] text-rose-600 hover:bg-rose-50 hover:border-rose-300 shadow-xs transition"
                         title="Delete Activity"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -1268,214 +1272,217 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                     </div>
                   </div>
 
-        {/* Main Activity Info */}
-        <div className="mt-3">
-          <h3 className="font-black text-lg text-slate-900">{act.title}</h3>
-          <p className="text-xs sm:text-sm text-slate-600 font-medium mt-1 leading-relaxed">
-            {act.description}
-          </p>
-        </div>
-
-        {/* Estimated Cost & Tags */}
-        <div className="mt-4 pt-3 border-t border-slate-200/60 flex flex-wrap items-center justify-between gap-3 text-xs">
-          <div className="flex items-center gap-2 font-bold text-slate-700">
-            <DollarSign className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Est. Fee: {act.estCost}</span>
-          </div>
-
-          {/* Sustainable 1-Click Reroute Button */}
-          {act.offbeatAlternative && !act.isSwapped && (
-            <button
-              onClick={() => handleSwap(selectedDayIndex, act.id)}
-              className="px-3.5 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-slate-950 font-black text-xs flex items-center gap-1.5 shadow-sm transition"
-            >
-              <ArrowRightLeft className="w-3.5 h-3.5" />
-              Avoid Surge: Swap with {act.offbeatAlternative.name}
-            </button>
-          )}
-        </div>
-      </div>
-      );
-    }))}
-    </div>
-      </div >
-
-    {/* Multimodal Transport & Stays Grid with Interactive Multiple Options */ }
-    < div className = "grid grid-cols-1 md:grid-cols-2 gap-6" >
-      {/* Multimodal Transit Breakdown with Multiple Flight/Train Selection */ }
-      < div className = "bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-xl space-y-4" >
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-black">
-                ✈️
-              </div>
-              <div>
-                <h3 className="font-black text-slate-900 text-base">Travel & Transit Options</h3>
-                <p className="text-xs text-slate-500 font-semibold">Multiple flights and trains. Switch selection anytime:</p>
-              </div>
-            </div>
-
-            {/* Sub-tab switcher for Itinerary view */}
-            <div className="flex gap-1 bg-slate-100 p-1 rounded-xl text-[10px] font-black">
-              <button
-                type="button"
-                onClick={() => setTransitTab("flight")}
-                className={`px-2 py-1 rounded-lg transition ${
-                  transitTab === "flight" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"
-                }`}
-              >
-                Flights
-              </button>
-              <button
-                type="button"
-                onClick={() => setTransitTab("train")}
-                className={`px-2 py-1 rounded-lg transition ${
-                  transitTab === "train" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"
-                }`}
-              >
-                Trains
-              </button>
-              <button
-                type="button"
-                onClick={() => setTransitTab("bus")}
-                className={`px-2 py-1 rounded-lg transition ${
-                  transitTab === "bus" ? "bg-blue-600 text-white shadow-xs" : "text-slate-600"
-                }`}
-              >
-                Buses
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            {(transitTab === "flight" ? travelOptions.flights : transitTab === "train" ? travelOptions.trains : travelOptions.buses).map((opt) => {
-              const isSelected = currentSelectedTravel?.id === opt.id;
-              return (
-                <div 
-                  key={opt.id} 
-                  className={`p-3.5 rounded-2xl border-2 transition space-y-2 ${
-                    isSelected 
-                      ? "bg-blue-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-400" 
-                      : "bg-slate-50/70 border-slate-200 hover:border-blue-300"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <span className="font-black text-xs text-slate-900 block">{opt.provider || opt.mode}</span>
-                      <span className="text-[11px] text-slate-600 font-medium">{opt.timing} • {opt.duration}</span>
-                    </div>
-                    <div className="text-right">
-                      <span className="font-black text-xs text-emerald-700 block">{opt.price}</span>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectTravel(opt)}
-                        className={`mt-1 px-3 py-1 rounded-xl text-[10px] font-black transition ${
-                          isSelected
-                            ? "bg-emerald-600 text-white shadow-xs cursor-default"
-                            : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300"
-                        }`}
-                      >
-                        {isSelected ? "✓ Selected" : "Select"}
-                      </button>
-                    </div>
+                  {/* Main Activity Info */}
+                  <div className="mt-3">
+                    <h3 className="font-serif font-bold text-lg text-[#172536]">{act.title}</h3>
+                    <p className="text-xs sm:text-sm text-slate-600 font-sans mt-1 leading-relaxed">
+                      {act.description}
+                    </p>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-200/50 text-[9px] text-slate-600 font-bold">
-                    <span>{opt.route}</span>
-                    <span>•</span>
-                    <span>{opt.cabinClass || opt.stops}</span>
-                    {opt.tags?.map((t, i) => (
-                      <span key={i} className="px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">
-                        {t}
-                      </span>
-                    ))}
+                  {/* Estimated Cost & Tags */}
+                  <div className="mt-4 pt-3 border-t border-[#E5E0D8] flex flex-wrap items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2 font-sans font-medium text-slate-700">
+                      <DollarSign className="w-3.5 h-3.5 text-[#2D5A46]" />
+                      <span>Est. Fee: {act.estCost}</span>
+                    </div>
+
+                    {/* Sustainable 1-Click Reroute Button */}
+                    {act.offbeatAlternative && !act.isSwapped && (
+                      <button
+                        onClick={() => handleSwap(selectedDayIndex, act.id)}
+                        className="px-3 py-1.5 rounded-lg bg-[#E99A25]/15 border border-[#E99A25]/30 hover:bg-[#E99A25]/25 text-[#B47012] font-sans font-semibold text-xs flex items-center gap-1.5 transition"
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5" />
+                        Avoid Surge: Swap with {act.offbeatAlternative.name}
+                      </button>
+                    )}
                   </div>
                 </div>
               );
-            })}
-          </div>
-        </div >
+            }))}
+        </div>
+      </div>
 
-    {/* Stay & Hotel Recommendations with Select Buttons */ }
-    < div className = "bg-white rounded-3xl border-2 border-slate-200 p-6 shadow-xl space-y-4" >
+    {/* Multimodal Transport & Stays Grid with Interactive Multiple Options */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      {/* Multimodal Transit Breakdown with Multiple Flight/Train Selection */}
+      <div className="bg-white rounded-3xl border border-[#E5E0D8] p-6 shadow-xs space-y-4">
+        <div className="flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center font-black">
-              🏨
+            <div className="w-8 h-8 rounded-lg bg-[#172536] text-white flex items-center justify-center font-bold text-xs">
+              ✈️
             </div>
             <div>
-              <h3 className="font-black text-slate-900 text-base">Accommodation Options</h3>
-              <p className="text-xs text-slate-500 font-semibold">Select your preferred hotel or resort:</p>
+              <h3 className="font-serif font-bold text-[#172536] text-base">Travel & Transit Options</h3>
+              <p className="text-xs text-slate-500 font-sans">Switch transit mode or carrier anytime:</p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            {travelOptions.stays.map((stay) => {
-              const isSelected = currentSelectedStay?.id === stay.id;
-              return (
-                <div 
-                  key={stay.id} 
-                  className={`p-3.5 rounded-2xl border-2 transition space-y-2 ${
-                    isSelected 
-                      ? "bg-amber-50/70 border-emerald-500 shadow-md ring-1 ring-emerald-400" 
-                      : "bg-slate-50/70 border-slate-200 hover:border-amber-300"
-                  }`}
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <div>
-                      <span className="text-[9px] font-black uppercase text-amber-800 bg-amber-200 px-1.5 py-0.5 rounded">
-                        {stay.type}
-                      </span>
-                      <h4 className="font-black text-xs text-slate-900 mt-1">{stay.name}</h4>
-                      <p className="text-[11px] text-emerald-800 font-bold mt-0.5">{stay.price}</p>
-                    </div>
-                    <div className="text-right shrink-0">
-                      <span className="text-[10px] font-black text-amber-900 bg-white px-2 py-0.5 rounded-md border border-amber-200 block mb-1.5">
-                        ⭐ {stay.rating}
-                      </span>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectStay(stay)}
-                        className={`px-3 py-1 rounded-xl text-[10px] font-black transition ${
-                          isSelected
-                            ? "bg-emerald-600 text-white shadow-xs cursor-default"
-                            : "bg-white hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 border border-slate-300"
-                        }`}
-                      >
-                        {isSelected ? "✓ Selected" : "Select"}
-                      </button>
-                    </div>
-                  </div>
-
-                  <p className="text-[10px] text-slate-600 font-medium line-clamp-1">{stay.description}</p>
-                </div>
-              );
-            })}
+          {/* Sub-tab switcher for Itinerary view */}
+          <div className="flex gap-1 bg-[#F7F5F0] border border-[#E5E0D8] p-1 rounded-xl text-[10px] font-sans font-medium">
+            <button
+              type="button"
+              onClick={() => setTransitTab("flight")}
+              className={`px-2.5 py-1 rounded-lg transition ${
+                transitTab === "flight" ? "bg-[#172536] text-white shadow-xs font-semibold" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Flights
+            </button>
+            <button
+              type="button"
+              onClick={() => setTransitTab("train")}
+              className={`px-2.5 py-1 rounded-lg transition ${
+                transitTab === "train" ? "bg-[#172536] text-white shadow-xs font-semibold" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Trains
+            </button>
+            <button
+              type="button"
+              onClick={() => setTransitTab("bus")}
+              className={`px-2.5 py-1 rounded-lg transition ${
+                transitTab === "bus" ? "bg-[#172536] text-white shadow-xs font-semibold" : "text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              Buses
+            </button>
           </div>
+        </div>
 
-  {/* Budget Breakdown Chart */ }
-  <div className="pt-2">
-    <h4 className="font-black text-xs text-slate-900 mb-2">Budget Distribution Breakdown:</h4>
-    <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-bold">
-      <div className="p-2 rounded-xl bg-teal-100 text-teal-900">
-        <span>Stays (40%)</span>
-        <p className="font-black">₹{activePlan.budgetBreakdown.stay.toLocaleString()}</p>
+        <div className="space-y-3">
+          {(transitTab === "flight" ? travelOptions.flights : transitTab === "train" ? travelOptions.trains : travelOptions.buses).map((opt) => {
+            const isSelected = currentSelectedTravel?.id === opt.id;
+            return (
+              <div 
+                key={opt.id} 
+                className={`p-3.5 rounded-xl border transition space-y-2 ${
+                  isSelected 
+                    ? "bg-[#172536]/5 border-[#172536] shadow-xs" 
+                    : "bg-[#FAF8F5] border-[#E5E0D8] hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="font-serif font-bold text-xs text-[#172536] block">{opt.provider || opt.mode}</span>
+                    <span className="text-[11px] text-slate-500 font-sans">{opt.timing} • {opt.duration}</span>
+                  </div>
+                  <div className="text-right">
+                    <span className="font-serif font-bold text-xs text-[#172536] block">{opt.price}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectTravel(opt)}
+                      className={`mt-1 px-3 py-1 rounded-lg text-[10px] font-sans font-medium transition ${
+                        isSelected
+                          ? "bg-[#172536] text-white cursor-default"
+                          : "bg-white hover:bg-slate-100 text-slate-700 border border-[#E5E0D8]"
+                      }`}
+                    >
+                      {isSelected ? "✓ Selected" : "Select"}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-[#E5E0D8] text-[10px] text-slate-500 font-sans">
+                  <span>{opt.route}</span>
+                  <span>•</span>
+                  <span>{opt.cabinClass || opt.stops}</span>
+                  {opt.tags?.map((t, i) => (
+                    <span key={i} className="px-1.5 py-0.5 rounded bg-[#172536]/5 text-[#172536] border border-[#172536]/10">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
       </div>
-      <div className="p-2 rounded-xl bg-blue-100 text-blue-900">
-        <span>Transit (25%)</span>
-        <p className="font-black">₹{activePlan.budgetBreakdown.transit.toLocaleString()}</p>
-      </div>
-      <div className="p-2 rounded-xl bg-amber-100 text-amber-900">
-        <span>Sightseeing (25%)</span>
-        <p className="font-black">₹{activePlan.budgetBreakdown.activities.toLocaleString()}</p>
-      </div>
-      <div className="p-2 rounded-xl bg-slate-100 text-slate-800">
-        <span>Buffer (10%)</span>
-        <p className="font-black">₹{activePlan.budgetBreakdown.buffer.toLocaleString()}</p>
+
+      {/* Stay & Hotel Recommendations with Select Buttons */}
+      <div className="bg-white rounded-3xl border border-[#E5E0D8] p-6 shadow-xs space-y-4">
+        <div className="flex items-center gap-2.5">
+          <div className="w-8 h-8 rounded-lg bg-[#E99A25]/20 text-[#B47012] flex items-center justify-center font-bold text-xs">
+            🏨
+          </div>
+          <div>
+            <h3 className="font-serif font-bold text-[#172536] text-base">Accommodation Options</h3>
+            <p className="text-xs text-slate-500 font-sans">Select your preferred hotel or heritage stay:</p>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          {travelOptions.stays.map((stay) => {
+            const isSelected = currentSelectedStay?.id === stay.id;
+            return (
+              <div 
+                key={stay.id} 
+                className={`p-3.5 rounded-xl border transition space-y-2 ${
+                  isSelected 
+                    ? "bg-[#E99A25]/5 border-[#E99A25] shadow-xs" 
+                    : "bg-[#FAF8F5] border-[#E5E0D8] hover:border-slate-300"
+                }`}
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <span className="text-[9px] font-sans font-bold uppercase text-[#B47012] bg-[#E99A25]/15 px-1.5 py-0.5 rounded">
+                      {stay.type}
+                    </span>
+                    <h4 className="font-serif font-bold text-xs text-[#172536] mt-1">{stay.name}</h4>
+                    <p className="text-[11px] text-[#2D5A46] font-sans font-medium mt-0.5">{stay.price}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="text-[10px] font-sans font-bold text-[#B47012] bg-white px-2 py-0.5 rounded-md border border-[#E5E0D8] block mb-1.5">
+                      ★ {stay.rating}
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => handleSelectStay(stay)}
+                      className={`px-3 py-1 rounded-lg text-[10px] font-sans font-medium transition ${
+                        isSelected
+                          ? "bg-[#172536] text-white cursor-default"
+                          : "bg-white hover:bg-slate-100 text-slate-700 border border-[#E5E0D8]"
+                      }`}
+                    >
+                      {isSelected ? "✓ Selected" : "Select"}
+                    </button>
+                  </div>
+                </div>
+                {stay.description && (
+                  <p className="text-[10px] text-slate-500 font-sans line-clamp-1 pt-1 border-t border-[#E5E0D8]/50">{stay.description}</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {/* Budget Breakdown Chart */}
+        {activePlan.budgetBreakdown && (
+          <div className="pt-2 border-t border-[#E5E0D8]">
+            <h4 className="font-serif font-bold text-xs text-[#172536] mb-2.5">Budget Distribution:</h4>
+            <div className="grid grid-cols-4 gap-2 text-center text-[10px] font-sans">
+              <div className="p-2 rounded-xl bg-[#F7F5F0] border border-[#E5E0D8] text-slate-800">
+                <span className="text-slate-500 block">Stays (40%)</span>
+                <p className="font-serif font-bold text-xs text-[#172536] mt-0.5">₹{activePlan.budgetBreakdown.stay?.toLocaleString()}</p>
+              </div>
+              <div className="p-2 rounded-xl bg-[#F7F5F0] border border-[#E5E0D8] text-slate-800">
+                <span className="text-slate-500 block">Transit (25%)</span>
+                <p className="font-serif font-bold text-xs text-[#172536] mt-0.5">₹{activePlan.budgetBreakdown.transit?.toLocaleString()}</p>
+              </div>
+              <div className="p-2 rounded-xl bg-[#F7F5F0] border border-[#E5E0D8] text-slate-800">
+                <span className="text-slate-500 block">Visits (25%)</span>
+                <p className="font-serif font-bold text-xs text-[#172536] mt-0.5">₹{activePlan.budgetBreakdown.activities?.toLocaleString()}</p>
+              </div>
+              <div className="p-2 rounded-xl bg-[#F7F5F0] border border-[#E5E0D8] text-slate-800">
+                <span className="text-slate-500 block">Buffer (10%)</span>
+                <p className="font-serif font-bold text-xs text-[#172536] mt-0.5">₹{activePlan.budgetBreakdown.buffer?.toLocaleString()}</p>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
-  </div>
-        </div >
-      </div >
 
       {/* STRIPE & PNR BOOKING MODAL */}
       {bookingModalState.isOpen && (
@@ -1492,11 +1499,11 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
       {/* EDIT ACTIVITY MODAL */}
       {editingActivity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#E5E0D8] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
               <div className="flex items-center gap-2">
-                <Edit3 className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-black text-lg text-slate-900">Edit Activity</h3>
+                <Edit3 className="w-5 h-5 text-[#172536]" />
+                <h3 className="font-serif font-bold text-lg text-[#172536]">Edit Activity</h3>
               </div>
               <button
                 type="button"
@@ -1509,7 +1516,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
 
             <form onSubmit={handleSaveEditedActivity} className="space-y-4">
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">Activity Title</label>
+                <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Activity Title</label>
                 <input
                   type="text"
                   required
@@ -1518,20 +1525,20 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                     ...editingActivity,
                     data: { ...editingActivity.data, title: e.target.value }
                   })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 font-bold text-sm focus:border-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E0D8] font-sans font-medium text-sm focus:border-[#172536] focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Time Slot</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Time Slot</label>
                   <select
                     value={editingActivity.data.slot}
                     onChange={(e) => setEditingActivity({
                       ...editingActivity,
                       data: { ...editingActivity.data, slot: e.target.value }
                     })}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                   >
                     {SLOT_PRESETS.map((slot) => (
                       <option key={slot} value={slot}>{slot}</option>
@@ -1539,14 +1546,14 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Category</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Category</label>
                   <select
                     value={editingActivity.data.type}
                     onChange={(e) => setEditingActivity({
                       ...editingActivity,
                       data: { ...editingActivity.data, type: e.target.value }
                     })}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                   >
                     <option value="Sightseeing">Sightseeing</option>
                     <option value="Food & Culture">Food & Culture</option>
@@ -1560,7 +1567,7 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Estimated Cost</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Estimated Cost</label>
                   <input
                     type="text"
                     value={editingActivity.data.estCost}
@@ -1568,12 +1575,12 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                       ...editingActivity,
                       data: { ...editingActivity.data, estCost: e.target.value }
                     })}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                     placeholder="₹300 - ₹600"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Crowd Score ({editingActivity.data.crowdScore}%)</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Crowd Score ({editingActivity.data.crowdScore}%)</label>
                   <input
                     type="range"
                     min="10"
@@ -1587,13 +1594,13 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                         data: { ...editingActivity.data, crowdScore: score, crowdLevel: level }
                       });
                     }}
-                    className="w-full accent-emerald-600 mt-2"
+                    className="w-full accent-[#172536] mt-2"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">Description & Details</label>
+                <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Description & Details</label>
                 <textarea
                   rows="3"
                   value={editingActivity.data.description}
@@ -1601,12 +1608,12 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                     ...editingActivity,
                     data: { ...editingActivity.data, description: e.target.value }
                   })}
-                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-semibold text-xs focus:border-emerald-500 focus:outline-none resize-none"
+                  className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans text-xs focus:border-[#172536] focus:outline-none resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">Tags (comma-separated)</label>
+                <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Tags (comma-separated)</label>
                 <input
                   type="text"
                   value={editingActivity.data.tags}
@@ -1614,24 +1621,24 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                     ...editingActivity,
                     data: { ...editingActivity.data, tags: e.target.value }
                   })}
-                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                   placeholder="Culture, Photography, Lake"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E0D8]">
                 <button
                   type="button"
                   onClick={() => setEditingActivity(null)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-sans font-medium text-xs transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-[#172536] hover:bg-[#22354d] text-white font-sans font-medium text-xs shadow-xs transition flex items-center gap-1.5"
                 >
-                  <Check className="w-3.5 h-3.5" />
+                  <Check className="w-3.5 h-3.5 text-[#E99A25]" />
                   <span>Save Changes</span>
                 </button>
               </div>
@@ -1643,11 +1650,11 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
       {/* ADD ACTIVITY MODAL */}
       {isAddingActivity && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/60 backdrop-blur-sm">
-          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+          <div className="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-[#E5E0D8] space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-[#E5E0D8] pb-3">
               <div className="flex items-center gap-2">
-                <Plus className="w-5 h-5 text-emerald-600" />
-                <h3 className="font-black text-lg text-slate-900">Add New Activity (Day {currentDay.dayNumber})</h3>
+                <Plus className="w-5 h-5 text-[#172536]" />
+                <h3 className="font-serif font-bold text-lg text-[#172536]">Add Activity (Day {currentDay.dayNumber})</h3>
               </div>
               <button
                 type="button"
@@ -1660,24 +1667,24 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
 
             <form onSubmit={handleSaveNewActivity} className="space-y-4">
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">Activity Title</label>
+                <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Activity Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Shikara Ride on Dal Lake at Sunset"
                   value={newActivity.title}
                   onChange={(e) => setNewActivity({ ...newActivity, title: e.target.value })}
-                  className="w-full px-3.5 py-2.5 rounded-xl border-2 border-slate-200 font-bold text-sm focus:border-emerald-500 focus:outline-none"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#E5E0D8] font-sans font-medium text-sm focus:border-[#172536] focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Time Slot</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Time Slot</label>
                   <select
                     value={newActivity.slot}
                     onChange={(e) => setNewActivity({ ...newActivity, slot: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                   >
                     {SLOT_PRESETS.map((slot) => (
                       <option key={slot} value={slot}>{slot}</option>
@@ -1685,11 +1692,11 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Category</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Category</label>
                   <select
                     value={newActivity.type}
                     onChange={(e) => setNewActivity({ ...newActivity, type: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                   >
                     <option value="Sightseeing">Sightseeing</option>
                     <option value="Food & Culture">Food & Culture</option>
@@ -1703,17 +1710,17 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Estimated Cost</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Estimated Cost</label>
                   <input
                     type="text"
                     value={newActivity.estCost}
                     onChange={(e) => setNewActivity({ ...newActivity, estCost: e.target.value })}
-                    className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                    className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                     placeholder="₹500 per person"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-black text-slate-700 mb-1">Crowd Score ({newActivity.crowdScore}%)</label>
+                  <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Crowd Score ({newActivity.crowdScore}%)</label>
                   <input
                     type="range"
                     min="10"
@@ -1724,46 +1731,46 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
                       const level = score > 75 ? "High (Peak)" : score > 45 ? "Moderate" : "Low (Serene)";
                       setNewActivity({ ...newActivity, crowdScore: score, crowdLevel: level });
                     }}
-                    className="w-full accent-emerald-600 mt-2"
+                    className="w-full accent-[#172536] mt-2"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">Description & Highlights</label>
+                <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Description & Highlights</label>
                 <textarea
                   rows="3"
                   placeholder="Describe the experience, meeting location, or tips..."
                   value={newActivity.description}
                   onChange={(e) => setNewActivity({ ...newActivity, description: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-semibold text-xs focus:border-emerald-500 focus:outline-none resize-none"
+                  className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans text-xs focus:border-[#172536] focus:outline-none resize-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-black text-slate-700 mb-1">Tags (comma-separated)</label>
+                <label className="block text-xs font-sans font-semibold text-slate-700 mb-1">Tags (comma-separated)</label>
                 <input
                   type="text"
                   placeholder="Scenic, Sunset, Lake"
                   value={newActivity.tags}
                   onChange={(e) => setNewActivity({ ...newActivity, tags: e.target.value })}
-                  className="w-full px-3 py-2 rounded-xl border-2 border-slate-200 font-bold text-xs focus:border-emerald-500 focus:outline-none"
+                  className="w-full px-3 py-2 rounded-xl border border-[#E5E0D8] font-sans font-medium text-xs focus:border-[#172536] focus:outline-none"
                 />
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+              <div className="flex items-center justify-end gap-2 pt-2 border-t border-[#E5E0D8]">
                 <button
                   type="button"
                   onClick={() => setIsAddingActivity(false)}
-                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs transition"
+                  className="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-sans font-medium text-xs transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-black text-xs shadow-md shadow-emerald-600/20 transition flex items-center gap-1.5"
+                  className="px-5 py-2 rounded-xl bg-[#172536] hover:bg-[#22354d] text-white font-sans font-medium text-xs shadow-xs transition flex items-center gap-1.5"
                 >
-                  <Plus className="w-3.5 h-3.5" />
+                  <Plus className="w-3.5 h-3.5 text-[#E99A25]" />
                   <span>Add to Day {currentDay.dayNumber}</span>
                 </button>
               </div>
@@ -1771,6 +1778,6 @@ export default function ItineraryView({ itinerary, onRegenerate, onOpenSOS, onOp
           </div>
         </div>
       )}
-    </div >
+    </div>
   );
 }

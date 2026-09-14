@@ -22,7 +22,9 @@ const AVAILABLE_DESTINATIONS = [
   "Rishikesh",
   "Kerala",
   "Ladakh",
-  "Varanasi"
+  "Varanasi",
+  "Kutch",
+  "Tirthan Valley"
 ];
 
 const TRAVEL_STYLES = [
@@ -318,28 +320,28 @@ export default function ReviewsView({ activeDestination = "Kashmir" }) {
       )}
 
       {/* Main Header Banner */}
-      <div className="p-6 sm:p-8 rounded-3xl bg-white border-2 border-slate-200 shadow-xl space-y-6">
+      <div className="p-6 sm:p-8 rounded-3xl bg-white border border-[#E5E0D8] shadow-xs space-y-6">
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <div className="space-y-1 max-w-2xl">
+          <div className="space-y-1.5 max-w-2xl">
             <div className="flex items-center gap-2">
-              <span className="px-3 py-1 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-black uppercase tracking-wider flex items-center gap-1">
-                <Sparkles className="w-3 h-3 text-emerald-600" /> Community Verified Insights
+              <span className="px-3 py-1 rounded-full bg-[#E99A25]/15 text-[#172536] text-[10px] font-bold uppercase tracking-wider flex items-center gap-1">
+                <Sparkles className="w-3 h-3 text-[#E99A25]" /> Verified Traveller Insights
               </span>
-              <span className="px-3 py-1 rounded-full bg-teal-100 text-teal-800 text-[10px] font-black uppercase tracking-wider">
-                Real-Time Reviews
+              <span className="px-3 py-1 rounded-full bg-[#2D5A46]/10 text-[#2D5A46] text-[10px] font-bold uppercase tracking-wider">
+                Field Reports
               </span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
-              Yatri Experiences & Eco-Tips Hub
+            <h1 className="font-serif text-3xl sm:text-4xl text-[#172536] font-normal tracking-tight">
+              Yatri Experiences & Field Tips Hub
             </h1>
-            <p className="text-xs sm:text-sm text-slate-600 font-medium leading-relaxed">
+            <p className="text-xs sm:text-sm text-[#64748B] leading-relaxed">
               Read authentic experiences, crowd updates, and safety ratings from fellow travelers across India. Share your personal journey to help maintain sustainable tourism.
             </p>
           </div>
 
           <button
             onClick={() => setModalOpen(true)}
-            className="px-6 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-600 via-teal-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white font-black text-sm flex items-center gap-2 shadow-lg shadow-emerald-600/25 transition transform hover:scale-[1.02] active:scale-[0.98] shrink-0 cursor-pointer"
+            className="px-6 py-3 rounded-xl bg-[#E99A25] hover:bg-[#D4881A] text-[#172536] font-bold text-xs sm:text-sm flex items-center gap-2 shadow-xs transition shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" /> Share Your Review
           </button>

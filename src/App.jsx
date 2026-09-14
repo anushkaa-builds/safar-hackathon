@@ -14,12 +14,21 @@ function App() {
         setUser(session.user);
       } else {
         const guest = localStorage.getItem("safar_guest_user");
+        const loggedOut = localStorage.getItem("safar_logged_out");
         if (guest) {
           try {
             setUser(JSON.parse(guest));
           } catch (e) {
             setUser(null);
           }
+        } else if (!loggedOut) {
+          const demoGuest = {
+            id: "guest_demo",
+            email: "guest.yatri@safar.in",
+            user_metadata: { name: "Guest Yatri" }
+          };
+          localStorage.setItem("safar_guest_user", JSON.stringify(demoGuest));
+          setUser(demoGuest);
         }
       }
       setLoading(false);
@@ -27,6 +36,7 @@ function App() {
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       if (session?.user) {
+        localStorage.removeItem("safar_logged_out");
         setUser(session.user);
       }
     });
@@ -41,6 +51,7 @@ function App() {
   async function handleLogout() {
     await supabase.auth.signOut();
     localStorage.removeItem("safar_guest_user");
+    localStorage.setItem("safar_logged_out", "true");
     setUser(null);
   }
 
